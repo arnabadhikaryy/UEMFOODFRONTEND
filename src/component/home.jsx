@@ -14,7 +14,7 @@ const MenuPage = () => {
     const fetchFoodItems = async () => {
       try {
         const response = await axios.get(
-          'http://uemfoodbackend-production.up.railway.app/production/getallfood'
+          'https://uemfoodbackend-production.up.railway.app/production/getallfood'
         );
         if (response.data.status) {
           setFoodItems(response.data.message);
@@ -86,7 +86,7 @@ const MenuPage = () => {
           <p className="mt-5 max-w-xl mx-auto text-xl text-gray-500">
             Freshly prepared with love and care [for fake login: phone:7365075168, password: arnab  (after successfully login, please refresh the page for see the menu items)]
           </p>
-          <p className="mt-5  text-xl text-gray-500"> for fake payment: “card_number”: “4208585190116667”, “card_type”: “CREDIT_CARD”, “card_issuer”: “VISA”, “expiry_month”: 06, “expiry_year”: 2027, “cvv”: “508”, Note: The OTP to be used on the Bank Page: 123456 </p>
+          <p className="mt-5 text-xl text-gray-500"> for fake payment: “card_number”: “4208585190116667”, “card_type”: “CREDIT_CARD”, “card_issuer”: “VISA”, “expiry_month”: 06, “expiry_year”: 2027, “cvv”: “508”, Note: The OTP to be used on the Bank Page: 123456 </p>
         </div>
 
         {/* Search Bar */}
