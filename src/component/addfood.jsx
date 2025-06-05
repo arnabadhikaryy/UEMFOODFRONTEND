@@ -126,6 +126,7 @@ const AddFoodPage = () => {
           >
             <h1 className="text-2xl font-bold text-white">Add New Food Item</h1>
             <p className="text-green-100 mt-1">Expand your menu offerings</p>
+            <p className="text-red-500 mt-1">Admin Password: 55555@arnab</p>
           </motion.div>
 
           {/* Form */}
