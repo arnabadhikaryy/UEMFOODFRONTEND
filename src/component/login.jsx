@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
 import { setCookie } from '../middelwaie/cookie';
+import backend_Url from '../backend_url_return_function/backendUrl';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ const LoginPage = () => {
 
     try {
       const response = await axios.post(
-        'https://uemfoodbackend-production.up.railway.app/user/login',
+        `${backend_Url}/user/login`,
         {
            phone: Number(formData.phone),
           password: formData.password

@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import amineGif from '../assets/anime.gif'; // Adjust path as needed
+import Navbar from './navbar';
 import Footer from './futer';
 
 const NotFoundPage = () => {
@@ -9,6 +10,7 @@ const NotFoundPage = () => {
 
   return (
     <div className="relative h-screen w-screen flex items-center justify-center overflow-hidden">
+      <Navbar/>
       {/* Animated GIF Background */}
       <div className="absolute inset-0 z-0">
         <img 

@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
 import { getCookie } from '../middelwaie/cookie';
+import Navbar from './navbar';
+import backend_Url from '../backend_url_return_function/backendUrl';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -23,7 +25,7 @@ const ProfilePage = () => {
 
       try {
         const response = await axios.post(
-          'https://uemfoodbackend-production.up.railway.app/user/profile',
+          `${backend_Url}/user/profile`,
           { token },
           {
             headers: {
@@ -81,6 +83,7 @@ const ProfilePage = () => {
   return (
       <div className="h-screen w-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <Toaster position="top-center" />
+      <Navbar/>
       
       <motion.div
         initial={{ opacity: 0 }}

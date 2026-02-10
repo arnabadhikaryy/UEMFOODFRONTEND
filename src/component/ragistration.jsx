@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
+import backend_Url from '../backend_url_return_function/backendUrl';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -65,7 +66,7 @@ const RegisterPage = () => {
       formDataToSend.append('avatar', avatar);
 
       const response = await axios.post(
-        'https://uemfoodbackend-production.up.railway.app/user/siginup',
+        `${backend_Url}/user/siginup`,
         formDataToSend,
         {
           headers: {
