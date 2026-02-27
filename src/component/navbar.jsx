@@ -63,54 +63,9 @@ const Navbar = () => {
           <div className="flex items-center">
             {user ? (
               <div className="relative ml-3">
-                <button
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center space-x-2 focus:outline-none"
-                >
-                  <span className="hidden md:inline text-sm font-medium text-gray-700">
-                    {user.name}
-                  </span>
-                  <img
-                    className="h-8 w-8 rounded-full object-cover"
-                    src={user.img_url || 'https://www.gravatar.com/avatar/default?s=200'}
-                    alt="Profile"
-                  />
-                  <svg
-                    className={`h-4 w-4 text-gray-500 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
 
                 {/* Dropdown menu */}
-                {dropdownOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50"
-                  >
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setDropdownOpen(false)}
-                    >
-                      Your Profile
-                    </Link>
-                    <div className="block px-4 py-2 text-sm text-gray-500 border-t border-gray-100">
-                      {user.phone}
-                    </div>
-                    <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                    >
-                      Sign out
-                    </button>
-                  </motion.div>
-                )}
+                
               </div>
             ) : (
               <Link
