@@ -140,7 +140,7 @@ const Navbar = () => {
               <MobileNavLink to="/orderhistory" text="Your Orders" onClick={() => setDropdownOpen(false)} />
               
               {/* Added missing Admin Links to mobile */}
-              {user?.phone === adminphone && (
+              {user?.phone == adminphone && (
                 <div className="border-t border-gray-100 my-2 pt-2">
                   <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Admin</p>
                   <MobileNavLink to="/addfood" text="Add Food" onClick={() => setDropdownOpen(false)} />

@@ -4,11 +4,10 @@ import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 import { motion } from "motion/react";
 import { useNavigate } from 'react-router-dom';
-import backend_Url from '../backend_url_return_function/backendUrl';
-import Navbar from './navbar';
+import Navbar from "./navbar";
 import { getCookie } from '../middelwaie/cookie';
 import { jwtDecode } from 'jwt-decode';
-import { adminphone } from '../backend_url_return_function/backendUrl';
+import { adminphone , backend_Url} from '../backend_url_return_function/backendUrl';
 
 const MenuPage = () => {
   const [foodItems, setFoodItems] = useState([]);
@@ -223,7 +222,7 @@ const MenuPage = () => {
                   </div>
 
                   {/* Admin Controls: Edit & Delete */}
-                  {user?.phone === adminphone && (
+                  {user?.phone == adminphone && (
                     <div className="flex gap-3 mt-5 pt-5 border-t border-gray-100">
                       <button
                         onClick={() => {
