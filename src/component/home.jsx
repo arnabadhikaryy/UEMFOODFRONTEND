@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from "./navbar";
 import { getCookie } from '../middelwaie/cookie';
 import { jwtDecode } from 'jwt-decode';
-import { adminphone , backend_Url} from '../backend_url_return_function/backendUrl';
+import { adminphone, backend_Url } from '../backend_url_return_function/backendUrl';
 
 const MenuPage = () => {
   const [foodItems, setFoodItems] = useState([]);
@@ -26,7 +26,7 @@ const MenuPage = () => {
         );
         if (response.data.status) {
           setFoodItems(response.data.message);
-        //  console.log(response.data.message);
+          //  console.log(response.data.message);
         } else {
           throw new Error('Failed to fetch menu items');
         }
@@ -53,7 +53,7 @@ const MenuPage = () => {
             phone: decoded.phone,
             img_url: decoded.img_url
           });
-         // console.log(decoded);
+          // console.log(decoded);
         } catch (error) {
           console.error('Error decoding token:', error);
         }
@@ -80,9 +80,9 @@ const MenuPage = () => {
       // Note: If your backend strictly uses app.delete(), change axios.post to axios.delete
       // and send the body using the 'data' config object: axios.delete(url, { data: { _id: id, token } })
       const response = await axios.delete(`${backend_Url}/production/delete/product`, {
-        data:{
-        token: token, 
-        _id: id
+        data: {
+          token: token,
+          _id: id
         }
       });
 
@@ -100,10 +100,33 @@ const MenuPage = () => {
     }
   };
   // ----------------------------
-
   const MenuItemSkeleton = () => (
     <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
-      <div className="h-48 bg-gray-200 animate-pulse"></div>
+      {/* Image placeholder with centered spinner */}
+      <div className="h-48 bg-gray-100 flex items-center justify-center">
+        <svg
+          className="animate-spin h-8 w-8 text-emerald-500"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
+        </svg>
+      </div>
+
+      {/* Text placeholders (kept the pulse animation here for a smooth look) */}
       <div className="p-5">
         <div className="h-6 bg-gray-200 rounded-full w-3/4 mb-4 animate-pulse"></div>
         <div className="flex justify-between items-center mt-4">
@@ -113,7 +136,6 @@ const MenuPage = () => {
       </div>
     </div>
   );
-
   const filteredItems = foodItems.filter(item =>
     item.title?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -206,7 +228,7 @@ const MenuPage = () => {
                       <button
                         onClick={() => {
                           navigate('/product', {
-                            state: { id: item._id, url: item.pic_url, title: item.title, price: item.price, description:item.description },
+                            state: { id: item._id, url: item.pic_url, title: item.title, price: item.price, description: item.description },
                           });
                         }}
                         className="px-5 py-2.5 bg-emerald-400 text-black text-sm font-semibold rounded-xl hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors duration-300"
