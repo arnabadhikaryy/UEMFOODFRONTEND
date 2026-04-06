@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { getCookie } from '../middelwaie/cookie';
 import { motion, AnimatePresence } from 'framer-motion';
+import { adminphone } from '../backend_url_return_function/backendUrl';
 
 const Navbar = () => {
   const [user, setUser] = useState(null);
@@ -48,7 +49,7 @@ const Navbar = () => {
       {/* Left side - Logo/Brand */}
       <div className="flex items-center">
         <Link to="/" className="flex items-center gap-2 text-2xl font-extrabold tracking-tight text-gray-900 transition-transform hover:scale-105">
-          <span className="text-emerald-600">UEM</span> Food
+          <span className="text-emerald-600">food</span> Hub
         </Link>
       </div>
 
@@ -139,7 +140,7 @@ const Navbar = () => {
               <MobileNavLink to="/orderhistory" text="Your Orders" onClick={() => setDropdownOpen(false)} />
               
               {/* Added missing Admin Links to mobile */}
-              {user?.phone === '73650751689' && (
+              {user?.phone === adminphone && (
                 <div className="border-t border-gray-100 my-2 pt-2">
                   <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Admin</p>
                   <MobileNavLink to="/addfood" text="Add Food" onClick={() => setDropdownOpen(false)} />
