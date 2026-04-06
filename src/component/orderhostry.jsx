@@ -92,7 +92,7 @@ const OrdersPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               <AnimatePresence>
                 {orders.map((order, index) => (
-                  <OrderCard key={order._id} order={order} index={index} navigate={navigate} />
+                  <OrderCard key={index} order={order} index={index} navigate={navigate} />
                 ))}
               </AnimatePresence>
             </div>
@@ -123,7 +123,7 @@ const OrderCard = ({ order, index, navigate }) => (
       />
       <div className="absolute top-4 left-4">
         <span className="bg-white/90 backdrop-blur-md text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm uppercase tracking-wider">
-          Delivered
+          Pending
         </span>
       </div>
     </div>
@@ -142,7 +142,11 @@ const OrderCard = ({ order, index, navigate }) => (
 
       <div className="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between">
         <button
-          onClick={() => navigate(`/orders/${order._id}`)}
+           onClick={() => {
+                          navigate('/product', {
+                            state: { id: order._id, url: order.pic_url, title: order.title, price: order.price, description: order.description },
+                          });
+                        }}
           className="flex items-center text-sm font-bold text-indigo-600 group/btn"
         >
           View Details
