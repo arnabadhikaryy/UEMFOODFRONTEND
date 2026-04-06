@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { getCookie } from '../middelwaie/cookie';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
   const [user, setUser] = useState(null);
@@ -41,109 +41,140 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-green-300 shadow-lg">
-      <div className=" max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          {/* Left side - Logo/Brand */}
-          <div className="flex items-center">
-            <Link to="/" className="text-xl font-bold text-gray-900">
-              UEM Food
-            </Link>
-          </div>
-
-          {/* Center - Navigation Links */}
-          <div className="hidden md:flex items-center space-x-8">
-            <NavLink to="/" text="Home" />
-            {user && <NavLink to="/addfood" text="Add Food" />}
-            {user && <NavLink to="/orderhistory" text="Your Orders" />}
-            {user && <NavLink to="/allusersorders" text="All Users Orders" />}  
-          </div>
-
-          {/* Right side - Auth Section */}
-          <div className="flex items-center">
-            {user ? (
-              <div className="relative ml-3">
-
-                {/* Dropdown menu */}
-                
-              </div>
-            ) : (
-              <Link
-                to="/login"
-                className="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Login
-              </Link>
-            )}
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
-            >
-              <svg
-                className={`h-6 w-6 ${dropdownOpen ? 'hidden' : 'block'}`}
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-              <svg
-                className={`h-6 w-6 ${dropdownOpen ? 'block' : 'hidden'}`}
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
+    <nav className="bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm sticky top-0 z-50">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex justify-between h-16">
+      
+      {/* Left side - Logo/Brand */}
+      <div className="flex items-center">
+        <Link to="/" className="flex items-center gap-2 text-2xl font-extrabold tracking-tight text-gray-900 transition-transform hover:scale-105">
+          <span className="text-emerald-600">UEM</span> Food
+        </Link>
       </div>
 
-      {/* Mobile menu */}
-      {dropdownOpen && (
-        <motion.div 
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          className="md:hidden"
+      {/* Center - Navigation Links */}
+      <div className="hidden md:flex items-center font-bold space-x-1 lg:space-x-4">
+        <NavLink to="/" text="Home" />
+        {user && <NavLink to="/profile" text="Account" />}
+        {user && <NavLink to="/orderhistory" text="Your Orders" />}
+        {user && <NavLink to="/profile/edit" text="Edit Profile" />}
+        
+        {/* Admin Links */}
+        {user?.phone === '7365075168' && (
+          <>
+            <div className="h-6 w-px bg-gray-300 mx-2"></div> {/* Separator */}
+            <NavLink to="/addfood" text="Add Food" />
+            <NavLink to="/allusersorders" text="All Orders" />
+          </>
+        )}  
+      </div>
+
+      {/* Right side - Auth Section */}
+      <div className="hidden md:flex items-center space-x-4">
+        {user ? (
+          <div className="flex items-center gap-4 ml-3">
+             {/* User Indicator / Simple Profile Button */}
+            <div className="flex items-center gap-2 text-sm font-medium text-gray-700 bg-gray-100 px-3 py-1.5 rounded-full">
+              <span className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-xs">
+                {user?.name?.charAt(0) || 'U'}
+              </span>
+              <span>{user?.name?.split(' ')[0] || 'User'}</span>
+            </div>
+            
+            <button
+              onClick={handleLogout}
+              className="text-sm font-medium text-red-600 hover:text-red-700 transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        ) : (
+          <Link
+            to="/login"
+            className="ml-4 inline-flex items-center px-5 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-green-100 hover:bg-emerald-700 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+          >
+            Login
+          </Link>
+        )}
+      </div>
+
+      {/* Mobile menu button */}
+      <div className="md:hidden flex items-center">
+        <button
+          onClick={() => setDropdownOpen(!dropdownOpen)}
+          className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-emerald-600 hover:bg-emerald-50 transition-colors focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-500"
+          aria-expanded={dropdownOpen}
         >
-          <div className="pt-2 pb-3 space-y-1">
-            <MobileNavLink to="/" text="Home" onClick={() => setDropdownOpen(false)} />
-            {user && (
-              <>
-                <MobileNavLink to="/addfood" text="Add Food" onClick={() => setDropdownOpen(false)} />
-                <MobileNavLink to="/orderhistory" text="Your Orders" onClick={() => setDropdownOpen(false)} />
-                <MobileNavLink to="/profile" text="Your Profile" onClick={() => setDropdownOpen(false)} />
-              </>
-            )}
-            {!user && (
+          <span className="sr-only">Open main menu</span>
+          {dropdownOpen ? (
+            <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {/* Mobile menu */}
+  <AnimatePresence>
+    {dropdownOpen && (
+      <motion.div 
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: 'auto' }}
+        exit={{ opacity: 0, height: 0 }}
+        className="md:hidden border-t border-gray-100 bg-white"
+      >
+        <div className="pt-2 pb-4 space-y-1 px-2 sm:px-3">
+          <MobileNavLink to="/" text="Home" onClick={() => setDropdownOpen(false)} />
+          
+          {user && (
+            <>
+              <MobileNavLink to="/profile" text="Your Profile" onClick={() => setDropdownOpen(false)} />
+              <MobileNavLink to="/profile/edit" text="Edit Profile" onClick={() => setDropdownOpen(false)} />
+              <MobileNavLink to="/orderhistory" text="Your Orders" onClick={() => setDropdownOpen(false)} />
+              
+              {/* Added missing Admin Links to mobile */}
+              {user?.phone === '73650751689' && (
+                <div className="border-t border-gray-100 my-2 pt-2">
+                  <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Admin</p>
+                  <MobileNavLink to="/addfood" text="Add Food" onClick={() => setDropdownOpen(false)} />
+                  <MobileNavLink to="/allusersorders" text="All Users Orders" onClick={() => setDropdownOpen(false)} />
+                </div>
+              )}
+            </>
+          )}
+          
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            {!user ? (
               <Link
                 to="/login"
                 onClick={() => setDropdownOpen(false)}
-                className="block w-full pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:border-gray-300"
+                className="block w-full text-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700"
               >
                 Login
               </Link>
-            )}
-            {user && (
+            ) : (
               <button
-                onClick={handleLogout}
-                className="block w-full text-left pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-red-600 hover:text-red-800 hover:bg-gray-50 hover:border-gray-300"
+                onClick={() => {
+                  handleLogout();
+                  setDropdownOpen(false);
+                }}
+                className="block w-full text-left px-3 py-2 text-base font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors"
               >
                 Sign out
               </button>
             )}
           </div>
-        </motion.div>
-      )}
-    </nav>
+        </div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+</nav>
   );
 };
 

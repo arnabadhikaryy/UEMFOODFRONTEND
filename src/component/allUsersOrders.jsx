@@ -36,6 +36,11 @@ const Icons = {
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M9 8h6m-5 0a3 3 0 110 6H9l3 3m-3-6h6m6 1a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
+  ),
+  Trash: ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+    </svg>
   )
 };
 
@@ -80,7 +85,44 @@ const UsersWithOrdersPage = () => {
     fetchUsersWithOrders();
   }, [navigate]);
 
-  // Calculate stats for the top summary cards
+  const handleRemoveOrder = async (userId, orderId) => {
+    const token = getCookie('authToken');
+    if (!token) {
+      toast.error('Authentication token missing');
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${backend_Url}/user/remove/order`, {
+        token: token,
+        userId: userId,
+        orderId: orderId
+      });
+
+      if (response.data.success) {
+        toast.success('Order removed successfully');
+        
+        setUsers(prevUsers => prevUsers.map(user => {
+          if (user._id === userId) {
+            const updatedOrders = [...user.orders];
+            const indexToRemove = updatedOrders.findIndex(order => order._id === orderId);
+            
+            if (indexToRemove !== -1) {
+              updatedOrders.splice(indexToRemove, 1);
+            }
+            
+            return { ...user, orders: updatedOrders };
+          }
+          return user;
+        }));
+      } else {
+        toast.error('Failed to remove order');
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Error removing order');
+    }
+  };
+
   const stats = useMemo(() => {
     const totalUsers = users.length;
     const totalOrders = users.reduce((acc, user) => acc + (user.orders?.length || 0), 0);
@@ -91,7 +133,6 @@ const UsersWithOrdersPage = () => {
     return { totalUsers, totalOrders, totalRevenue };
   }, [users]);
 
-  // Helper to calculate single user total
   const getUserTotal = (orders) => {
     return orders.reduce((sum, order) => sum + (Number(order.price) || 0), 0);
   };
@@ -111,7 +152,6 @@ const UsersWithOrdersPage = () => {
       <main className="flex-grow py-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto space-y-8">
           
-          {/* Header Section */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
               <motion.h1 
@@ -125,7 +165,6 @@ const UsersWithOrdersPage = () => {
             </div>
           </div>
 
-          {/* Stats Cards */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -136,7 +175,6 @@ const UsersWithOrdersPage = () => {
             <StatCard label="Total Revenue (Est)" value={`₹${stats.totalRevenue.toLocaleString()}`} color="bg-emerald-500" icon={<Icons.Currency className="w-6 h-6 text-white" />} />
           </motion.div>
 
-          {/* User List */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="p-6 border-b border-slate-100 bg-white">
               <h2 className="text-lg font-semibold text-slate-800">Client List</h2>
@@ -154,6 +192,7 @@ const UsersWithOrdersPage = () => {
                     isExpanded={expandedUserId === (user._id || index)}
                     onToggle={() => toggleExpand(user._id || index)}
                     userTotal={getUserTotal(user.orders)}
+                    onRemoveOrder={handleRemoveOrder}
                   />
                 ))}
               </div>
@@ -165,8 +204,6 @@ const UsersWithOrdersPage = () => {
     </div>
   );
 };
-
-// --- Sub Components for cleaner code ---
 
 const StatCard = ({ label, value, color, icon }) => (
   <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center space-x-4">
@@ -180,10 +217,17 @@ const StatCard = ({ label, value, color, icon }) => (
   </div>
 );
 
-const UserRow = ({ user, isExpanded, onToggle, userTotal }) => {
+const UserRow = ({ user, isExpanded, onToggle, userTotal, onRemoveOrder }) => {
+  
+  // Sorting the orders by _id to group identical items together
+  const groupedOrders = [...user.orders].sort((a, b) => {
+    const idA = a._id || '';
+    const idB = b._id || '';
+    return idA.localeCompare(idB);
+  });
+
   return (
     <div className="group transition-colors hover:bg-slate-50">
-      {/* Clickable Header */}
       <div 
         onClick={onToggle}
         className="p-5 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4"
@@ -228,7 +272,6 @@ const UserRow = ({ user, isExpanded, onToggle, userTotal }) => {
         </div>
       </div>
 
-      {/* Expandable Content */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -241,8 +284,13 @@ const UserRow = ({ user, isExpanded, onToggle, userTotal }) => {
             <div className="p-5 sm:p-8">
               <h4 className="text-sm font-semibold text-slate-500 mb-4 uppercase tracking-wider">Order Details</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {user.orders.map((order, idx) => (
-                  <OrderCard key={order._id || idx} order={order} />
+                {groupedOrders.map((order, idx) => (
+                  <OrderCard 
+                    key={order._id ? `${order._id}-${idx}` : idx} 
+                    order={order} 
+                    userId={user._id}
+                    onRemove={onRemoveOrder}
+                  />
                 ))}
               </div>
             </div>
@@ -253,7 +301,7 @@ const UserRow = ({ user, isExpanded, onToggle, userTotal }) => {
   );
 };
 
-const OrderCard = ({ order }) => (
+const OrderCard = ({ order, userId, onRemove }) => (
   <motion.div 
     whileHover={{ y: -4 }}
     className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 flex flex-col group"
@@ -264,7 +312,7 @@ const OrderCard = ({ order }) => (
         alt={order.title}
         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
       />
-      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-white text-xs px-2 py-1 rounded">
+      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-white text-xs px-2 py-1 rounded flex gap-2">
          #{order._id?.slice(-4)}
       </div>
     </div>
@@ -275,9 +323,20 @@ const OrderCard = ({ order }) => (
       </div>
       <div className="flex items-center justify-between pt-3 border-t border-slate-50">
         <span className="text-lg font-bold text-slate-800">₹{order.price}</span>
-        <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">
-            Confirmed
-        </span>
+        
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">
+              Confirmed
+          </span>
+          <button 
+            onClick={() => onRemove(userId, order._id)}
+            className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition-colors"
+            title="Delete Order"
+          >
+            <Icons.Trash className="w-4 h-4" />
+          </button>
+        </div>
+
       </div>
     </div>
   </motion.div>

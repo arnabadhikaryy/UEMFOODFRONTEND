@@ -6,14 +6,18 @@ import { motion } from "motion/react";
 import { useNavigate } from 'react-router-dom';
 import backend_Url from '../backend_url_return_function/backendUrl';
 import Navbar from './navbar';
+import { getCookie } from '../middelwaie/cookie';
+import { jwtDecode } from 'jwt-decode';
 
 const MenuPage = () => {
   const [foodItems, setFoodItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
+  // 1. Fetch Food Items
   useEffect(() => {
     const fetchFoodItems = async () => {
       try {
@@ -22,6 +26,7 @@ const MenuPage = () => {
         );
         if (response.data.status) {
           setFoodItems(response.data.message);
+        //  console.log(response.data.message);
         } else {
           throw new Error('Failed to fetch menu items');
         }
@@ -35,6 +40,66 @@ const MenuPage = () => {
 
     fetchFoodItems();
   }, []);
+
+  // 2. Check Authentication
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = getCookie('authToken');
+      if (token) {
+        try {
+          const decoded = jwtDecode(token);
+          setUser({
+            name: decoded.name,
+            phone: decoded.phone,
+            img_url: decoded.img_url
+          });
+         // console.log(decoded);
+        } catch (error) {
+          console.error('Error decoding token:', error);
+        }
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  // --- NEW: Delete Function ---
+  const handleDelete = async (id) => {
+    // Optional: Add a confirmation dialog to prevent accidental deletions
+    const isConfirmed = window.confirm("Are you sure you want to delete this food item?");
+    if (!isConfirmed) return;
+
+    const token = getCookie('authToken');
+
+    if (!token) {
+      toast.error("Authentication token not found. Please log in.");
+      return;
+    }
+
+    try {
+      // Note: If your backend strictly uses app.delete(), change axios.post to axios.delete
+      // and send the body using the 'data' config object: axios.delete(url, { data: { _id: id, token } })
+      const response = await axios.delete(`${backend_Url}/production/delete/product`, {
+        data:{
+        token: token, 
+        _id: id
+        }
+      });
+
+      // Assuming your backend sends a success flag or standard 200 OK status
+      if (response.status === 200) {
+        toast.success("Food item deleted successfully!");
+        // Instantly remove the deleted item from the UI by filtering it out of the state
+        setFoodItems(prevItems => prevItems.filter(item => item._id !== id));
+      } else {
+        toast.error("Failed to delete the item.");
+      }
+    } catch (error) {
+      console.error("Error deleting item:", error);
+      toast.error(error.response?.data?.message || "An error occurred while deleting.");
+    }
+  };
+  // ----------------------------
 
   const MenuItemSkeleton = () => (
     <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
@@ -57,9 +122,9 @@ const MenuPage = () => {
     <div className="h-full w-screen bg-gray-50">
       <Navbar />
       <Toaster position="top-right" />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        
+
         {/* Header Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-extrabold text-gray-950 sm:text-5xl tracking-tight">
@@ -68,8 +133,8 @@ const MenuPage = () => {
           <p className="mt-4 max-w-xl mx-auto text-lg text-gray-600">
             Freshly prepared dishes made with passion.
           </p>
-          
-          {/* Developer Note (Hidden in production ideally) */}
+
+          {/* Developer Note */}
           <div className="mt-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-900 max-w-2xl mx-auto">
             <p className='font-bold'>Test Credentials:</p>
             <p>Phone: <span className='font-mono'>7365075168</span> | Password: <span className='font-mono'>arnab</span></p>
@@ -137,24 +202,54 @@ const MenuPage = () => {
                     <p className="text-2xl font-extrabold text-emerald-600">
                       ₹{item.price}
                     </p>
-                    <button 
-                      onClick={() => {
-                        navigate('/product', {
-                          state: { id: item._id, url: item.pic_url, title: item.title, price: item.price },
-                        });
-                      }} 
-                      className="px-5 py-2.5 bg-amber-300 text-black text-sm font-semibold rounded-xl hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors duration-300"
-                    >
-                      View Details
-                    </button>
+                    {item.availability === true ?
+                      <button
+                        onClick={() => {
+                          navigate('/product', {
+                            state: { id: item._id, url: item.pic_url, title: item.title, price: item.price, description:item.description },
+                          });
+                        }}
+                        className="px-5 py-2.5 bg-emerald-400 text-black text-sm font-semibold rounded-xl hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors duration-300"
+                      >
+                        View Details
+                      </button>
+
+                      : <div>
+                        <button onClick={() => {
+                          alert('This product is not available in the market right now');
+                        }} className='text-red-500 font-semibold'> Unavailable </button>
+                      </div>}
                   </div>
+
+                  {/* Admin Controls: Edit & Delete */}
+                  {user?.phone === '7365075168' && (
+                    <div className="flex gap-3 mt-5 pt-5 border-t border-gray-100">
+                      <button
+                        onClick={() => {
+                          navigate('/editfood', {
+                            state: { id: item._id, url: item.pic_url, title: item.title, price: item.price },
+                          });
+                        }}
+                        className="flex-1 py-2 bg-blue-50 text-blue-600 text-sm font-semibold rounded-lg hover:bg-blue-100 transition-colors"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item._id)}
+                        className="flex-1 py-2 bg-red-50 text-red-600 text-sm font-semibold rounded-lg hover:bg-red-100 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+
                 </div>
               </motion.div>
             ))}
           </motion.div>
         )}
       </div>
-      
+
       <Footer />
     </div>
   );
