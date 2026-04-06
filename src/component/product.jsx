@@ -232,7 +232,10 @@ function Product() {
                     <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">Quantity</label>
                     <div className="flex items-center bg-gray-50 rounded-xl border border-gray-200 w-fit">
                       <button
-                        onClick={() => handleQuantityChange(-1)}
+                       //onClick={() => handleQuantityChange(-1)}
+                        onClick={()=>{
+                        alert('function is in Tseting state, if you want to buy more then one, them plese order repeatedly. thankyou for your support')
+                       }}
                         className="p-3 text-gray-500 hover:text-emerald-600 transition-colors disabled:opacity-30"
                         disabled={quantity <= 1 || loading || loadingCod}
                       >
@@ -240,7 +243,10 @@ function Product() {
                       </button>
                       <span className="w-12 text-center font-bold text-gray-900 text-xl select-none">{quantity}</span>
                       <button
-                        onClick={() => handleQuantityChange(1)}
+                       // onClick={() => handleQuantityChange(1)}
+                        onClick={()=>{
+                        alert('function is in Tseting state, if you want to buy more then one, them plese order repeatedly. thankyou for your support')
+                       }}
                         className="p-3 text-gray-500 hover:text-emerald-600 transition-colors disabled:opacity-30"
                         disabled={quantity >= 10 || loading || loadingCod}
                       >
