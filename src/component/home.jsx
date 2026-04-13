@@ -26,7 +26,6 @@ const MenuPage = () => {
         );
         if (response.data.status) {
           setFoodItems(response.data.message);
-          //  console.log(response.data.message);
         } else {
           throw new Error('Failed to fetch menu items');
         }
@@ -53,7 +52,6 @@ const MenuPage = () => {
             phone: decoded.phone,
             img_url: decoded.img_url
           });
-          // console.log(decoded);
         } catch (error) {
           console.error('Error decoding token:', error);
         }
@@ -65,7 +63,6 @@ const MenuPage = () => {
 
   // --- NEW: Delete Function ---
   const handleDelete = async (id) => {
-    // Optional: Add a confirmation dialog to prevent accidental deletions
     const isConfirmed = window.confirm("Are you sure you want to delete this food item?");
     if (!isConfirmed) return;
 
@@ -77,8 +74,6 @@ const MenuPage = () => {
     }
 
     try {
-      // Note: If your backend strictly uses app.delete(), change axios.post to axios.delete
-      // and send the body using the 'data' config object: axios.delete(url, { data: { _id: id, token } })
       const response = await axios.delete(`${backend_Url}/production/delete/product`, {
         data: {
           token: token,
@@ -86,10 +81,8 @@ const MenuPage = () => {
         }
       });
 
-      // Assuming your backend sends a success flag or standard 200 OK status
       if (response.status === 200) {
         toast.success("Food item deleted successfully!");
-        // Instantly remove the deleted item from the UI by filtering it out of the state
         setFoodItems(prevItems => prevItems.filter(item => item._id !== id));
       } else {
         toast.error("Failed to delete the item.");
@@ -99,43 +92,30 @@ const MenuPage = () => {
       toast.error(error.response?.data?.message || "An error occurred while deleting.");
     }
   };
-  // ----------------------------
+
   const MenuItemSkeleton = () => (
     <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
-      {/* Image placeholder with centered spinner */}
-      <div className="h-48 bg-gray-100 flex items-center justify-center">
+      <div className="h-32 sm:h-48 bg-gray-100 flex items-center justify-center">
         <svg
-          className="animate-spin h-8 w-8 text-emerald-500"
+          className="animate-spin h-6 w-6 sm:h-8 sm:w-8 text-emerald-500"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
         >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          ></circle>
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          ></path>
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
       </div>
-
-      {/* Text placeholders (kept the pulse animation here for a smooth look) */}
-      <div className="p-5">
-        <div className="h-6 bg-gray-200 rounded-full w-3/4 mb-4 animate-pulse"></div>
-        <div className="flex justify-between items-center mt-4">
-          <div className="h-6 bg-gray-200 rounded-full w-1/4 animate-pulse"></div>
-          <div className="h-10 bg-gray-200 rounded-xl w-24 animate-pulse"></div>
+      <div className="p-3 sm:p-5">
+        <div className="h-4 sm:h-6 bg-gray-200 rounded-full w-3/4 mb-4 animate-pulse"></div>
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center mt-2 sm:mt-4 gap-2 sm:gap-0">
+          <div className="h-4 sm:h-6 bg-gray-200 rounded-full w-1/4 animate-pulse"></div>
+          <div className="h-8 sm:h-10 bg-gray-200 rounded-xl w-full sm:w-24 animate-pulse"></div>
         </div>
       </div>
     </div>
   );
+
   const filteredItems = foodItems.filter(item =>
     item.title?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -155,12 +135,6 @@ const MenuPage = () => {
           <p className="mt-4 max-w-xl mx-auto text-lg text-gray-600">
             Freshly prepared dishes made with passion.
           </p>
-
-          {/* Developer Note */}
-          <div className="mt-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-900 max-w-2xl mx-auto">
-            <p className='font-bold'>Test Credentials:</p>
-            <p>Phone: <span className='font-mono'>7365075168</span> | Password: <span className='font-mono'>arnab</span></p>
-          </div>
         </div>
 
         {/* Search Bar */}
@@ -183,7 +157,7 @@ const MenuPage = () => {
 
         {/* Menu Grid / Loading / Error */}
         {loading ? (
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:gap-8 lg:grid-cols-3 xl:grid-cols-4">
             {[...Array(8)].map((_, i) => <MenuItemSkeleton key={i} />)}
           </div>
         ) : error ? (
@@ -201,7 +175,7 @@ const MenuPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
-            className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            className="grid grid-cols-2 gap-4 sm:gap-8 lg:grid-cols-3 xl:grid-cols-4"
           >
             {filteredItems.map((item) => (
               <motion.div
@@ -216,49 +190,53 @@ const MenuPage = () => {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 </div>
-                <div className="p-5 flex flex-col flex-grow">
-                  <h3 className="text-xl font-semibold text-gray-950 capitalize flex-grow">
+                <div className="p-3 sm:p-5 flex flex-col flex-grow">
+                  <h3 className="text-base sm:text-xl font-semibold text-gray-950 capitalize flex-grow line-clamp-2">
                     {item.title}
                   </h3>
-                  <div className="mt-5 flex justify-between items-center">
-                    <p className="text-2xl font-extrabold text-emerald-600">
+                  <div className="mt-3 sm:mt-5 flex flex-col sm:flex-row justify-between sm:items-center gap-2 sm:gap-0">
+                    <p className="text-lg sm:text-2xl font-extrabold text-emerald-600">
                       ₹{item.price}
                     </p>
-                    {item.availability === true ?
+                    {item.availability === true ? (
                       <button
                         onClick={() => {
                           navigate('/product', {
                             state: { id: item._id, url: item.pic_url, title: item.title, price: item.price, description: item.description },
                           });
                         }}
-                        className="px-5 py-2.5 bg-emerald-400 text-black text-sm font-semibold rounded-xl hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors duration-300"
+                        className="px-3 py-2 sm:px-5 sm:py-2.5 bg-emerald-400 text-green-600 text-xs sm:text-sm font-semibold rounded-xl hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors duration-300 w-full sm:w-auto text-center"
                       >
-                        View Details
+                        Buy now
                       </button>
-
-                      : <div>
-                        <button onClick={() => {
-                          alert('This product is not available in the market right now');
-                        }} className='text-red-500 font-semibold'> Unavailable </button>
-                      </div>}
+                    ) : (
+                      <div>
+                        <button
+                          onClick={() => { alert('This product is not available in the market right now'); }}
+                          className='text-red-500 text-sm sm:text-base font-semibold w-full sm:w-auto text-left sm:text-right'
+                        > 
+                          Unavailable 
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Admin Controls: Edit & Delete */}
                   {user?.phone == adminphone && (
-                    <div className="flex gap-3 mt-5 pt-5 border-t border-gray-100">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-4 sm:mt-5 pt-4 sm:pt-5 border-t border-gray-100">
                       <button
                         onClick={() => {
                           navigate('/editfood', {
                             state: { id: item._id, url: item.pic_url, title: item.title, price: item.price },
                           });
                         }}
-                        className="flex-1 py-2 bg-blue-50 text-blue-600 text-sm font-semibold rounded-lg hover:bg-blue-100 transition-colors"
+                        className="flex-1 py-1.5 sm:py-2 bg-blue-50 text-blue-600 text-xs sm:text-sm font-semibold rounded-lg hover:bg-blue-100 transition-colors"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(item._id)}
-                        className="flex-1 py-2 bg-red-50 text-red-600 text-sm font-semibold rounded-lg hover:bg-red-100 transition-colors"
+                        className="flex-1 py-1.5 sm:py-2 bg-red-50 text-red-600 text-xs sm:text-sm font-semibold rounded-lg hover:bg-red-100 transition-colors"
                       >
                         Delete
                       </button>
