@@ -11,12 +11,13 @@ const RegisterPage = () => {
     fullName: '',
     phone: '',
     password: '',
-    user_address: ''
+    village: '',
+    pin: '',
+    landmark: ''
   });
   const [avatar, setAvatar] = useState(null);
   const [preview, setPreview] = useState('');
   const [loading, setLoading] = useState(false);
-  // New state for password visibility
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
@@ -44,7 +45,8 @@ const RegisterPage = () => {
     e.preventDefault();
     setLoading(true);
 
-    if (!formData.fullName || !formData.phone || !formData.password || !formData.user_address) {
+    // Updated validation to check all parts of the address
+    if (!formData.fullName || !formData.phone || !formData.password || !formData.village || !formData.pin || !formData.landmark) {
       toast.error('Please fill all fields');
       setLoading(false);
       return;
@@ -57,11 +59,14 @@ const RegisterPage = () => {
     }
 
     try {
+      // Combine address data into the requested format
+      const combinedAddress = `village: ${formData.village} , pin: ${formData.pin} , landmark: ${formData.landmark}`;
+
       const formDataToSend = new FormData();
       formDataToSend.append('fullName', formData.fullName);
       formDataToSend.append('phone', formData.phone);
       formDataToSend.append('password', formData.password);
-      formDataToSend.append('user_address', formData.user_address);
+      formDataToSend.append('user_address', combinedAddress); // Send the combined string
       formDataToSend.append('avatar', avatar);
 
       const response = await axios.post(
@@ -111,7 +116,7 @@ const RegisterPage = () => {
               transition={{ delay: 0.3 }}
               className="text-4xl font-extrabold text-white mb-4"
             >
-              Join UEM Food
+              Join foodHub
             </motion.h2>
             <motion.p 
               initial={{ opacity: 0 }}
@@ -124,14 +129,14 @@ const RegisterPage = () => {
           </div>
           
           <div className="relative z-10 text-orange-200 text-sm font-medium">
-            © {new Date().getFullYear()} UEM Food. All rights reserved.
+            © {new Date().getFullYear()} foodHub. All rights reserved.
           </div>
         </div>
 
         {/* Right Side: Registration Form (Scrollable) */}
         <div className="w-full md:w-7/12 p-6 sm:p-10 flex flex-col overflow-y-auto custom-scrollbar">
           <div className="md:hidden mb-6 text-center">
-             <h1 className="text-3xl font-bold text-orange-500">UEM Food</h1>
+             <h1 className="text-3xl font-bold text-orange-500">foodHub</h1>
              <p className="text-gray-500 mt-2">Create your account</p>
           </div>
 
@@ -205,7 +210,7 @@ const RegisterPage = () => {
                   value={formData.fullName}
                   onChange={handleChange}
                   className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-                  placeholder="John Doe"
+                  placeholder="Enter your name"
                 />
               </motion.div>
 
@@ -228,7 +233,7 @@ const RegisterPage = () => {
                     value={formData.phone}
                     onChange={handleChange}
                     className="block w-full pl-14 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-                    placeholder="9876543210"
+                    placeholder="Enter your phone number"
                   />
                 </div>
               </motion.div>
@@ -272,24 +277,52 @@ const RegisterPage = () => {
               </div>
             </motion.div>
 
-            {/* Address */}
+            {/* Divided Address Section */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.7 }}
+              className="space-y-4"
             >
-              <label htmlFor="user_address" className="block text-gray-700 text-sm font-semibold mb-2">
-                Address
+              <label className="block text-gray-700 text-sm font-semibold">
+                Delivery Address
               </label>
-              <textarea
-                id="user_address"
-                name="user_address"
-                value={formData.user_address}
-                onChange={handleChange}
-                rows="3"
-                className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all resize-none"
-                placeholder="Enter your delivery address..."
-              ></textarea>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                <div>
+                  <input
+                    type="text"
+                    id="village"
+                    name="village"
+                    value={formData.village}
+                    onChange={handleChange}
+                    className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                    placeholder="Village Name"
+                  />
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    id="pin"
+                    name="pin"
+                    value={formData.pin}
+                    onChange={handleChange}
+                    className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                    placeholder="PIN Number"
+                  />
+                </div>
+              </div>
+              <div>
+                <input
+                  type="text"
+                  id="landmark"
+                  name="landmark"
+                  value={formData.landmark}
+                  onChange={handleChange}
+                  className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                  placeholder="Landmark"
+                />
+              </div>
             </motion.div>
 
             <motion.button
