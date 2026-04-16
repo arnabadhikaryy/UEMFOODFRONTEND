@@ -48,11 +48,11 @@ const Navbar = () => {
 
           {/* Left side - Logo/Brand */}
           <div className="flex items-center gap-3"> {/* Added gap for spacing between logo and text */}
-<img 
-  src="src/assets/arnab.png" 
-  alt="Logo" 
-  className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500" 
-/>
+            <img
+              src="https://res.cloudinary.com/di4skdwzm/image/upload/q_auto/f_auto/v1776366420/ic_launcher-web_poqstv.png"
+              alt="Logo"
+              className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500"
+            />
             <Link to="/" className="flex items-center gap-2 text-2xl font-extrabold tracking-tight text-gray-900 transition-transform hover:scale-105">
               <span className="text-emerald-600">food</span> Hub
             </Link>
