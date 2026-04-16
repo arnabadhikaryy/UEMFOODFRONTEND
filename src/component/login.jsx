@@ -186,7 +186,7 @@ const LoginPage = () => {
               </div>
             </motion.div>
 
-            <motion.div
+            {/* <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
@@ -197,7 +197,7 @@ const LoginPage = () => {
               <a href="#" className="text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors">
                 Forgot password?
               </a>
-            </motion.div>
+            </motion.div> */}
 
             <motion.button
               whileHover={{ scale: 1.01 }}

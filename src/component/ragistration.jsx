@@ -19,6 +19,9 @@ const RegisterPage = () => {
   const [preview, setPreview] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  
+  // New state for the Privacy Policy checkbox
+  const [agreedToPolicy, setAgreedToPolicy] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,7 +48,7 @@ const RegisterPage = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Updated validation to check all parts of the address
+    // Validation for all fields
     if (!formData.fullName || !formData.phone || !formData.password || !formData.village || !formData.pin || !formData.landmark) {
       toast.error('Please fill all fields');
       setLoading(false);
@@ -58,15 +61,21 @@ const RegisterPage = () => {
       return;
     }
 
+    // New validation for Privacy Policy
+    if (!agreedToPolicy) {
+      toast.error('You must read and agree to the Privacy Policy to register.');
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Combine address data into the requested format
       const combinedAddress = `village: ${formData.village} , pin: ${formData.pin} , landmark: ${formData.landmark}`;
 
       const formDataToSend = new FormData();
       formDataToSend.append('fullName', formData.fullName);
       formDataToSend.append('phone', formData.phone);
       formDataToSend.append('password', formData.password);
-      formDataToSend.append('user_address', combinedAddress); // Send the combined string
+      formDataToSend.append('user_address', combinedAddress);
       formDataToSend.append('avatar', avatar);
 
       const response = await axios.post(
@@ -322,6 +331,39 @@ const RegisterPage = () => {
                   className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
                   placeholder="Landmark"
                 />
+              </div>
+            </motion.div>
+
+            {/* Privacy Policy Checkbox - New Addition */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.75 }}
+              className="flex items-start pt-2"
+            >
+              <div className="flex items-center h-6">
+                <input
+                  id="privacyPolicy"
+                  name="privacyPolicy"
+                  type="checkbox"
+                  checked={agreedToPolicy}
+                  onChange={(e) => setAgreedToPolicy(e.target.checked)}
+                  className="w-5 h-5 text-orange-500 bg-gray-50 border-gray-300 rounded focus:ring-orange-500 focus:ring-2 transition-all cursor-pointer"
+                />
+              </div>
+              <div className="ml-3 text-sm leading-6">
+                <label htmlFor="privacyPolicy" className="font-medium text-gray-700 cursor-pointer">
+                  I have read and agree to the{' '}
+                  <a
+                    href="https://docs.google.com/document/d/1rrMWZ1AkCdf_eiSGXCjodsfTuMHhXvN_fDR11biKRXk/edit?usp=sharing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-orange-600 hover:text-orange-500 underline transition-colors"
+                    onClick={(e) => e.stopPropagation()} // Prevents the label from toggling the checkbox when clicking the link
+                  >
+                    Privacy Policy
+                  </a>
+                </label>
               </div>
             </motion.div>
 
