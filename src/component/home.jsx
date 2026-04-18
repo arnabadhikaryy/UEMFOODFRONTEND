@@ -129,9 +129,6 @@ const MenuPage = () => {
 
         {/* Header Section */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-extrabold text-gray-950 sm:text-5xl tracking-tight">
-            Explore Our <span className="text-emerald-600">Menu</span>
-          </h1>
           <p className="mt-4 max-w-xl mx-auto text-lg text-gray-600">
             Freshly prepared dishes made with passion.
           </p>

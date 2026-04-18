@@ -54,7 +54,7 @@ const Navbar = () => {
               className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500"
             />
             <Link to="/" className="flex items-center gap-2 text-2xl font-extrabold tracking-tight text-gray-900 transition-transform hover:scale-105">
-              <span className="text-emerald-600">food</span> Hub
+              <span className="text-emerald-600">Hungry</span> Baba
             </Link>
           </div>
 
