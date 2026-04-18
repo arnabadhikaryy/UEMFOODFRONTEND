@@ -102,7 +102,7 @@ const LoginPage = () => {
         {/* Right Side: Login Form */}
         <div className="w-full md:w-1/2 p-8 sm:p-12 flex flex-col justify-center bg-white">
           <div className="md:hidden mb-8 text-center">
-             <h1 className="text-3xl font-bold text-orange-500">foodHub</h1>
+             <h1 className="text-3xl font-bold text-orange-500">Hungry Baba</h1>
              <p className="text-gray-500 mt-2">Welcome back! Please sign in.</p>
           </div>
 

@@ -145,7 +145,7 @@ const RegisterPage = () => {
         {/* Right Side: Registration Form (Scrollable) */}
         <div className="w-full md:w-7/12 p-6 sm:p-10 flex flex-col overflow-y-auto custom-scrollbar">
           <div className="md:hidden mb-6 text-center">
-             <h1 className="text-3xl font-bold text-orange-500">foodHub</h1>
+             <h1 className="text-3xl font-bold text-orange-500">Hungry Baba</h1>
              <p className="text-gray-500 mt-2">Create your account</p>
           </div>
 
