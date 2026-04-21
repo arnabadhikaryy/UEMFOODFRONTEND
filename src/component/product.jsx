@@ -230,7 +230,7 @@ function Product() {
                 <div className="flex flex-col sm:flex-row sm:items-center text-gray-800 justify-between gap-6 mb-8">
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">Quantity</label>
-                    <div className="flex items-center bg-gray-50 rounded-xl border border-gray-200 w-fit">
+                    {/* <div className="flex items-center bg-gray-50 rounded-xl border border-gray-200 w-fit">
                       <button
                        //onClick={() => handleQuantityChange(-1)}
                         onClick={()=>{
@@ -252,7 +252,8 @@ function Product() {
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
                       </button>
-                    </div>
+                    </div> */}
+
                   </div>
                   
                   <div className="text-left sm:text-right">
@@ -266,7 +267,7 @@ function Product() {
               <div className="flex flex-col gap-3 mt-4 lg:mt-0">
                 
                 {/* Pay Now Button - CURRENTLY DISABLED */}
-                <button
+                {/* <button
                   disabled={true}
                   className="w-full py-4 px-6 rounded-xl text-lg font-bold transition-all bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
                 >
@@ -277,7 +278,7 @@ function Product() {
                     </span>
                     <span className="bg-gray-200 px-3 py-1 rounded-md text-sm sm:hidden">₹{price * quantity}</span>
                   </div>
-                </button>
+                </button> */}
 
                 {/* Cash on Delivery Button */}
                 <motion.button
@@ -307,9 +308,9 @@ function Product() {
                 </motion.button>
               </div>
               
-              <p className="mt-5 text-center text-sm font-medium text-gray-400">
+              {/* <p className="mt-5 text-center text-sm font-medium text-gray-400">
                 Online payments are temporarily paused. COD is available.
-              </p>
+              </p> */}
             </div>
           </div>
         </motion.div>
