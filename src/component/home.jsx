@@ -212,7 +212,7 @@ const MenuPage = () => {
                           onClick={() => { alert('This product is not available in the market right now'); }}
                           className='text-red-500 text-sm sm:text-base font-semibold w-full sm:w-auto text-left sm:text-right'
                         > 
-                          {user?.phone}
+                          Unavailable
                         </button>
                       </div>
                     )}
