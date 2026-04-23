@@ -277,6 +277,27 @@ const EditProfile = () => {
               </button>
             </motion.div>
           </form>
+
+          {/* Delete Account Link Section */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 text-center"
+          >
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              No longer wish to keep your account?{' '}
+              <a
+                href="https://docs.google.com/forms/d/e/1FAIpQLSetz1-eZAuYODyjrm02NqHh9MvGTIqjI7fBkuuX6w55k5tY4Q/viewform"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 font-medium transition-colors"
+              >
+                Request account deletion
+              </a>
+            </p>
+          </motion.div>
+          
         </motion.div>
       </div>
     </div>

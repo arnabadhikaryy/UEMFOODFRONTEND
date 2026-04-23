@@ -49,12 +49,12 @@ const Navbar = () => {
           {/* Left side - Logo/Brand */}
           <div className="flex items-center gap-3">
             <img
-              src="https://res.cloudinary.com/di4skdwzm/image/upload/v1776960521/ic_launcher-web_relcs3.png"
+              src="https://res.cloudinary.com/di4skdwzm/image/upload/playstore-icon_y7w5po.png"
               alt="Logo"
-              className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500"
+              className="w-12 h-12  object-cover border-2 border-emerald-500"
             />
             <Link to="/" className="flex items-center gap-2 text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white transition-transform hover:scale-105">
-              <span className="text-emerald-600 dark:text-emerald-500">Hungry</span> Baba
+              <span className="text-emerald-600 dark:text-emerald-500">Hungry</span>Baba
             </Link>
           </div>
 
