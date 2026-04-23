@@ -49,7 +49,7 @@ const Navbar = () => {
           {/* Left side - Logo/Brand */}
           <div className="flex items-center gap-3">
             <img
-              src="https://res.cloudinary.com/di4skdwzm/image/upload/q_auto/f_auto/v1776366420/ic_launcher-web_poqstv.png"
+              src="https://res.cloudinary.com/di4skdwzm/image/upload/v1776960521/ic_launcher-web_relcs3.png"
               alt="Logo"
               className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500"
             />
