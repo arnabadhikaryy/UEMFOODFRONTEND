@@ -129,6 +129,7 @@ const MenuPage = () => {
 
         {/* Header Section */}
         <div className="text-center mb-12">
+          <p className=' text-green-700 font-bold text-5xl '>Shop opening time 5PM to 10PM</p>
           <p className="mt-4 max-w-xl mx-auto text-lg text-gray-600 dark:text-gray-400">
             Freshly prepared dishes made with passion.
           </p>
