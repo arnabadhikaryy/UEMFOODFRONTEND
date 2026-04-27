@@ -133,7 +133,7 @@ const OrderCard = ({ order, index, navigate }) => (
         <h3 className="text-xl font-bold text-slate-800 dark:text-white line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
           {order.title}
         </h3>
-        <span className="text-xl font-black text-slate-900 dark:text-white">₹{order.price}</span>
+        <span className="text-xl font-black text-slate-900 dark:text-white">₹{Math.round(order.price -(order.discount/100)*order.price)}</span>
       </div>
 
       <p className="text-sm text-slate-400 dark:text-slate-500 font-mono mb-6">

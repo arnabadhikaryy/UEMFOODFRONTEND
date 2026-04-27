@@ -13,7 +13,7 @@ function Product() {
   const location = useLocation();
   const navigate = useNavigate();
   // Safe destructuring with defaults
-  const { url, title, price, id, description } = location.state || {};
+  const { url, title, price, id, description, originalPrice, discount } = location.state || {};
   
   const [userPhone, setUserPhone] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -174,7 +174,7 @@ function Product() {
       </AnimatePresence>
       {/* -------------------------- */}
 
-      <div className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+     <div className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -219,10 +219,31 @@ function Product() {
                   {description}
                 </p>
 
-                <div className="flex items-end gap-2 mb-8">
-                  <span className="text-4xl font-black text-gray-900">₹{price}</span>
-                  <span className="text-gray-400 text-lg mb-1 font-medium">/ plate</span>
+                {/* UPDATED PRICING DESIGN SECTION */}
+                <div className="mb-8 flex flex-col gap-1">
+                  {discount && discount > 0 ? (
+                    <>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl text-gray-400 line-through font-medium">
+                          ₹{originalPrice}
+                        </span>
+                        <span className="bg-red-100 text-red-600 text-2xl font-bold px-2.5 py-0.5 rounded-md uppercase tracking-wide">
+                          {discount}% OFF
+                        </span>
+                      </div>
+                      <div className="flex items-end gap-2">
+                        <span className="text-4xl font-black text-gray-900">₹{price}</span>
+                        <span className="text-gray-400 text-lg mb-1 font-medium">/ plate</span>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex items-end gap-2">
+                      <span className="text-4xl font-black text-gray-900">₹{price}</span>
+                      <span className="text-gray-400 text-lg mb-1 font-medium">/ plate</span>
+                    </div>
+                  )}
                 </div>
+                {/* END OF UPDATED PRICING SECTION */}
 
                 {/* Divider */}
                 <div className="h-px bg-gray-100 w-full mb-8"></div>
@@ -233,7 +254,6 @@ function Product() {
                     <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">Quantity</label>
                     <div className="flex items-center bg-gray-50 rounded-xl border border-gray-200 w-fit">
                       <button
-                       //onClick={() => handleQuantityChange(-1)}
                         onClick={()=>{
                         alert('function is in Tseting state, if you want to buy more then one, them plese order repeatedly. thankyou for your support')
                        }}
@@ -244,7 +264,6 @@ function Product() {
                       </button>
                       <span className="w-12 text-center font-bold text-gray-900 text-xl select-none">{quantity}</span>
                       <button
-                       // onClick={() => handleQuantityChange(1)}
                         onClick={()=>{
                         alert('function is in Tseting state, if you want to buy more then one, them plese order repeatedly. thankyou for your support')
                        }}
