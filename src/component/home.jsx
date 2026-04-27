@@ -175,7 +175,16 @@ const MenuPage = () => {
             transition={{ duration: 0.4 }}
             className="grid grid-cols-2 gap-4 sm:gap-8 lg:grid-cols-3 xl:grid-cols-4"
           >
-            {filteredItems.map((item) => (
+            {filteredItems.map((item) => {
+              
+              // NEW LOGIC: Calculate discount and final price
+              const hasDiscount = item.discount && item.discount > 0;
+              // Using Math.round to avoid decimals in INR
+              const finalPrice = hasDiscount 
+                  ? Math.round(item.price - (item.price * (item.discount / 100))) 
+                  : item.price;
+
+              return (
               <motion.div
                 key={item._id}
                 whileHover={{ y: -5 }}
@@ -192,15 +201,46 @@ const MenuPage = () => {
                   <h3 className="text-base sm:text-xl font-semibold text-gray-950 dark:text-white capitalize flex-grow line-clamp-2 transition-colors">
                     {item.title}
                   </h3>
+                  
                   <div className="mt-3 sm:mt-5 flex flex-col sm:flex-row justify-between sm:items-center gap-2 sm:gap-0">
-                    <p className="text-lg sm:text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
-                      ₹{item.price}
-                    </p>
+                    
+                    {/* NEW UI: Conditional Rendering based on discount */}
+                    <div>
+                      {hasDiscount ? (
+                        <div className="flex flex-col">
+                           <div className="flex items-center gap-2 mb-1">
+                             <p className="text-2xl font-bold sm:text-base text-gray-400 dark:text-gray-500 line-through">
+                               ₹{item.price}
+                             </p>
+                             <span className="bg-red-100 text-red-600 text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-md dark:bg-red-900/30 dark:text-red-400">
+                               {item.discount}% OFF
+                             </span>
+                           </div>
+                           <p className="text-lg sm:text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
+                              ₹{finalPrice}
+                           </p>
+                        </div>
+                      ) : (
+                        <p className="text-lg sm:text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
+                          ₹{item.price}
+                        </p>
+                      )}
+                    </div>
+
                     {item.availability === true ? (
                       <button
                         onClick={() => {
                           navigate('/product', {
-                            state: { id: item._id, url: item.pic_url, title: item.title, price: item.price, description: item.description },
+                            state: { 
+                              id: item._id, 
+                              url: item.pic_url, 
+                              title: item.title, 
+                              // Passing both original and final prices in case your product page needs them
+                              originalPrice: item.price, 
+                              price: finalPrice, 
+                              discount: item.discount,
+                              description: item.description 
+                            },
                           });
                         }}
                         className="px-3 py-2 sm:px-5 sm:py-2.5 bg-emerald-400 dark:bg-emerald-500 text-green-800 dark:text-white text-xs sm:text-sm font-semibold rounded-xl hover:bg-emerald-600 dark:hover:bg-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 focus:ring-emerald-500 transition-colors duration-300 w-full sm:w-auto text-center"
@@ -225,7 +265,13 @@ const MenuPage = () => {
                       <button
                         onClick={() => {
                           navigate('/editfood', {
-                            state: { id: item._id, url: item.pic_url, title: item.title, price: item.price },
+                            state: { 
+                              id: item._id, 
+                              url: item.pic_url, 
+                              title: item.title, 
+                              price: item.price,
+                              discount: item.discount || 0
+                            },
                           });
                         }}
                         className="flex-1 py-1.5 sm:py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs sm:text-sm font-semibold rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
@@ -243,7 +289,7 @@ const MenuPage = () => {
 
                 </div>
               </motion.div>
-            ))}
+            )})}
           </motion.div>
         )}
       </div>

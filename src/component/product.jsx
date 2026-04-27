@@ -102,7 +102,8 @@ function Product() {
         `${backend_Url}/production/order`,
         {
           token: userToken,
-          orderID: id
+          orderID: id,
+          after_discount_final_price: price
         }
       );
 

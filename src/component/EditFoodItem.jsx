@@ -13,12 +13,14 @@ const EditFoodItem = () => {
     const foodId = location.state?.id;
 
     // State for the form data
+   // State for the form data
     const [formData, setFormData] = useState({
         title: '',
         price: '',
+        discount: 0, // <-- Add this line
         availability: true,
         description:'',
-        pic_url: '' // Holds the existing image URL to show a preview if needed
+        pic_url: '' 
     });
 
     // State for the actual image file to be uploaded
@@ -48,11 +50,13 @@ const EditFoodItem = () => {
                 });
 
                 const result = await response.json();
+                console.log(result);
 
                 if (result.success) {
                     setFormData({
                         title: result.data.title,
                         price: result.data.price,
+                        discount: result.data.discount || 0, // <-- Add this line
                         availability: result.data.availability,
                         description: result.data.description,
                         pic_url: result.data.pic_url
@@ -99,6 +103,7 @@ const EditFoodItem = () => {
             submitData.append('_id', foodId);
             submitData.append('title', formData.title);
             submitData.append('price', formData.price);
+            submitData.append('discount', formData.discount); // <-- Add this line
             submitData.append('description', formData.description);
             submitData.append('availability', formData.availability);
 
@@ -190,6 +195,21 @@ const EditFoodItem = () => {
                     required 
                     className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all duration-200"
                     placeholder="0.00"
+                />
+            </div>
+
+            {/* Discount Input (NEW) */}
+            <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Discount (%)</label>
+                <input 
+                    type="number" 
+                    name="discount" 
+                    value={formData.discount} 
+                    onChange={handleInputChange} 
+                    min="0"
+                    max="100"
+                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all duration-200"
+                    placeholder="0"
                 />
             </div>
 
