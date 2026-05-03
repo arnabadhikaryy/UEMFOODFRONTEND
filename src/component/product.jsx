@@ -48,7 +48,7 @@ function Product() {
         navigate('/login');
       }
     } else {
-      navigate('/login');
+      navigate('/register');
     }
   }, [navigate, location.state]);
 

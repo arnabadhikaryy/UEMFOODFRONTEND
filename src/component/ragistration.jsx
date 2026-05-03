@@ -20,7 +20,6 @@ const RegisterPage = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
-  // New state for the Privacy Policy checkbox
   const [agreedToPolicy, setAgreedToPolicy] = useState(false);
 
   const handleChange = (e) => {
@@ -48,7 +47,6 @@ const RegisterPage = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Validation for all fields
     if (!formData.fullName || !formData.phone || !formData.password || !formData.village || !formData.pin || !formData.landmark) {
       toast.error('Please fill all fields');
       setLoading(false);
@@ -61,7 +59,6 @@ const RegisterPage = () => {
       return;
     }
 
-    // New validation for Privacy Policy
     if (!agreedToPolicy) {
       toast.error('You must read and agree to the Privacy Policy to register.');
       setLoading(false);
@@ -104,159 +101,109 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="h-full w-screen text-amber-950 bg-gray-50 flex items-center justify-center p-4 sm:p-8 font-sans">
+    <div className="h-full w-screen bg-[#fdf2f2] flex flex-col items-center justify-center p-4 py-20 font-sans selection:bg-[#ff5733] selection:text-white">
       <Toaster position="top-center" />
-      
+
       <motion.div 
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="max-w-5xl w-full max-h-[90vh] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="max-w-md w-full relative pt-12"
       >
-        {/* Left Side: Branding Panel */}
-        <div className="hidden md:flex md:w-5/12 bg-gradient-to-br from-orange-500 to-amber-600 p-12 flex-col justify-between relative overflow-hidden">
-          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-10"></div>
-          <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 rounded-full bg-orange-900 opacity-10"></div>
-          
-          <div className="relative z-10">
-            <motion.h2 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-4xl font-extrabold text-white mb-4"
+        {/* Dynamic Avatar Upload (Replaces the static Chef Header) */}
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-12 z-20">
+          <div className="relative group w-32 h-32">
+            {preview ? (
+              <img 
+                src={preview} 
+                alt="Profile preview" 
+                className="w-full h-full rounded-full object-cover border-4 border-white shadow-md bg-white transition-transform group-hover:scale-105"
+              />
+            ) : (
+              <div className="w-full h-full rounded-full bg-white border-4 border-white shadow-md flex flex-col items-center justify-center transition-colors group-hover:bg-gray-50 cursor-pointer overflow-hidden">
+                 <svg className="w-10 h-10 text-gray-300 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Photo</span>
+              </div>
+            )}
+            <label 
+              htmlFor="avatar" 
+              className="absolute bottom-1 right-1 bg-[#ff5733] text-white rounded-full p-2 cursor-pointer hover:bg-[#e04c2c] shadow-lg transition-transform hover:scale-110"
             >
-              Join foodHub
-            </motion.h2>
-            <motion.p 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="text-orange-100 text-lg leading-relaxed"
-            >
-              Become a part of our campus food community. Create your account to start ordering your favorite meals in seconds.
-            </motion.p>
-          </div>
-          
-          <div className="relative z-10 text-orange-200 text-sm font-medium">
-            © {new Date().getFullYear()} foodHub. All rights reserved.
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <input 
+                id="avatar" 
+                name="avatar" 
+                type="file" 
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </label>
           </div>
         </div>
 
-        {/* Right Side: Registration Form (Scrollable) */}
-        <div className="w-full md:w-7/12 p-6 sm:p-10 flex flex-col overflow-y-auto custom-scrollbar">
-          <div className="md:hidden mb-6 text-center">
-             <h1 className="text-3xl font-bold text-orange-500">Hungry Baba</h1>
-             <p className="text-gray-500 mt-2">Create your account</p>
+        {/* Main Card */}
+        <div className="bg-white rounded-[40px] shadow-2xl pt-28 pb-8 px-6 sm:px-10 w-full relative z-10">
+          
+          {/* Top Toggle Buttons */}
+          <div className="flex bg-gray-50 rounded-full p-1.5 mb-8 shadow-inner">
+            <button 
+              type="button"
+              className="flex-1 py-3 text-center rounded-full bg-[#ff5733] text-black font-semibold text-sm shadow-md transition-all"
+            >
+              Register
+            </button>
+            <button 
+              onClick={() => navigate('/login')}
+              type="button"
+              className="flex-1 py-3 text-center rounded-full text-gray-500 font-semibold text-sm transition-all hover:text-gray-700"
+            >
+              Log In
+            </button>
           </div>
 
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="hidden md:block mb-8"
-          >
-            <h1 className="text-3xl font-bold text-gray-900">Create Account</h1>
-            <p className="text-gray-500 mt-2">Fill in your details to get started.</p>
-          </motion.div>
-
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Profile Image Upload */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3 }}
-              className="flex flex-col items-center justify-center mb-6"
-            >
-              <div className="relative group w-28 h-28">
-                {preview ? (
-                  <img 
-                    src={preview} 
-                    alt="Profile preview" 
-                    className="w-full h-full rounded-full object-cover border-4 border-white shadow-lg transition-transform group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="w-full h-full rounded-full bg-gray-50 border-2 border-dashed border-gray-300 flex flex-col items-center justify-center transition-colors group-hover:bg-gray-100">
-                    <svg className="w-8 h-8 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    <span className="text-xs text-gray-400 font-medium">Upload</span>
-                  </div>
-                )}
-                <label 
-                  htmlFor="avatar" 
-                  className="absolute bottom-0 right-0 bg-orange-500 text-white rounded-full p-2.5 cursor-pointer hover:bg-orange-600 shadow-md transition-transform hover:scale-110"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <input 
-                    id="avatar" 
-                    name="avatar" 
-                    type="file" 
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-                </label>
+            {/* Full Name Input */}
+            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
+              <label htmlFor="fullName" className="block text-gray-600 text-sm font-medium mb-1.5 ml-2">Full Name</label>
+              <input
+                type="text"
+                id="fullName"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleChange}
+                className="block w-full px-6 py-4 bg-gray-50 border-transparent rounded-full text-gray-900 focus:bg-white focus:ring-2 focus:ring-[#ff5733] focus:border-transparent transition-all duration-200 outline-none"
+                placeholder="Full Name"
+              />
+            </motion.div>
+
+            {/* Phone Number Input */}
+            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
+              <label htmlFor="phone" className="block text-gray-600 text-sm font-medium mb-1.5 ml-2">Phone Number</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                  <span className="text-gray-400 font-medium">+91</span>
+                </div>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="block w-full pl-14 pr-6 py-4 bg-gray-50 border-transparent rounded-full text-gray-900 focus:bg-white focus:ring-2 focus:ring-[#ff5733] focus:border-transparent transition-all duration-200 outline-none"
+                  placeholder="Phone Number"
+                />
               </div>
             </motion.div>
 
-            {/* Grid for Name and Phone */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                <label htmlFor="fullName" className="block text-gray-700 text-sm font-semibold mb-2">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  id="fullName"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-                  placeholder="Enter your name"
-                />
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 }}
-              >
-                <label htmlFor="phone" className="block text-gray-700 text-sm font-semibold mb-2">
-                  Phone Number
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <span className="text-gray-500 font-medium">+91</span>
-                  </div>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="block w-full pl-14 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-                    placeholder="Enter your phone number"
-                  />
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Password */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 }}
-            >
-              <label htmlFor="password" className="block text-gray-700 text-sm font-semibold mb-2">
-                Password
-              </label>
+            {/* Password Input */}
+            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
+              <label htmlFor="password" className="block text-gray-600 text-sm font-medium mb-1.5 ml-2">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -264,153 +211,111 @@ const RegisterPage = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="block w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-                  placeholder="Create a strong password"
+                  className="block w-full pl-6 pr-14 py-4 bg-gray-50 border-transparent rounded-full text-gray-900 focus:bg-white focus:ring-2 focus:ring-[#ff5733] focus:border-transparent transition-all duration-200 outline-none"
+                  placeholder="Password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-orange-500 transition-colors focus:outline-none"
+                  className="absolute inset-y-0 right-3 pr-4 flex items-center text-gray-400 hover:text-[#ff5733] transition-colors focus:outline-none"
                 >
-                  {showPassword ? (
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0l-3.29-3.29" />
-                    </svg>
+                   {showPassword ? (
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0l-3.29-3.29" /></svg>
                   ) : (
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                   )}
                 </button>
               </div>
             </motion.div>
 
-            {/* Divided Address Section */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.7 }}
-              className="space-y-4"
-            >
-              <label className="block text-gray-700 text-sm font-semibold">
-                Delivery Address
-              </label>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                <div>
-                  <input
-                    type="text"
-                    id="village"
-                    name="village"
-                    value={formData.village}
-                    onChange={handleChange}
-                    className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-                    placeholder="Village Name"
-                  />
-                </div>
-                <div>
-                  <input
-                    type="text"
-                    id="pin"
-                    name="pin"
-                    value={formData.pin}
-                    onChange={handleChange}
-                    className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-                    placeholder="PIN Number"
-                  />
-                </div>
-              </div>
-              <div>
+            {/* Address Group */}
+            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }} className="space-y-4 pt-2 border-t border-gray-100">
+              <label className="block text-gray-600 text-sm font-medium ml-2">Delivery Details</label>
+              <div className="grid grid-cols-2 gap-4">
                 <input
                   type="text"
-                  id="landmark"
-                  name="landmark"
-                  value={formData.landmark}
+                  name="village"
+                  value={formData.village}
                   onChange={handleChange}
-                  className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
-                  placeholder="Landmark"
+                  className="block w-full px-6 py-4 bg-gray-50 border-transparent rounded-full text-gray-900 focus:bg-white focus:ring-2 focus:ring-[#ff5733] focus:border-transparent transition-all duration-200 outline-none text-sm"
+                  placeholder="Village"
                 />
-              </div>
-            </motion.div>
-
-            {/* Privacy Policy Checkbox - New Addition */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.75 }}
-              className="flex items-start pt-2"
-            >
-              <div className="flex items-center h-6">
                 <input
-                  id="privacyPolicy"
-                  name="privacyPolicy"
-                  type="checkbox"
-                  checked={agreedToPolicy}
-                  onChange={(e) => setAgreedToPolicy(e.target.checked)}
-                  className="w-5 h-5 text-orange-500 bg-gray-50 border-gray-300 rounded focus:ring-orange-500 focus:ring-2 transition-all cursor-pointer"
+                  type="text"
+                  name="pin"
+                  value={formData.pin}
+                  onChange={handleChange}
+                  className="block w-full px-6 py-4 bg-gray-50 border-transparent rounded-full text-gray-900 focus:bg-white focus:ring-2 focus:ring-[#ff5733] focus:border-transparent transition-all duration-200 outline-none text-sm"
+                  placeholder="PIN Code"
                 />
               </div>
-              <div className="ml-3 text-sm leading-6">
-                <label htmlFor="privacyPolicy" className="font-medium text-gray-700 cursor-pointer">
-                  I have read and agree to the{' '}
-                  <a
-                    href="https://docs.google.com/document/d/1rrMWZ1AkCdf_eiSGXCjodsfTuMHhXvN_fDR11biKRXk/edit?usp=sharing"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-orange-600 hover:text-orange-500 underline transition-colors"
-                    onClick={(e) => e.stopPropagation()} // Prevents the label from toggling the checkbox when clicking the link
-                  >
-                    Privacy Policy
-                  </a>
-                </label>
-              </div>
+              <input
+                type="text"
+                name="landmark"
+                value={formData.landmark}
+                onChange={handleChange}
+                className="block w-full px-6 py-4 bg-gray-50 border-transparent rounded-full text-gray-900 focus:bg-white focus:ring-2 focus:ring-[#ff5733] focus:border-transparent transition-all duration-200 outline-none"
+                placeholder="Landmark"
+              />
             </motion.div>
 
-            <motion.button
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              disabled={loading}
-              className={`w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-red-600 bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
-            >
-              {loading ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Creating Account...
-                </>
-              ) : 'Create Account'}
-            </motion.button>
+            {/* Privacy Policy Checkbox */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="flex items-center pt-2 pl-2">
+              <input
+                id="privacyPolicy"
+                type="checkbox"
+                checked={agreedToPolicy}
+                onChange={(e) => setAgreedToPolicy(e.target.checked)}
+                className="w-4 h-4 text-[#ff5733] bg-gray-50 border-gray-300 rounded focus:ring-[#ff5733] focus:ring-2 transition-all cursor-pointer"
+              />
+              <label htmlFor="privacyPolicy" className="ml-3 text-sm text-gray-500 cursor-pointer">
+                I agree to <span className="text-[#ff5733] font-medium">Terms</span> and {' '}
+                <a
+                  href="https://docs.google.com/document/d/1rrMWZ1AkCdf_eiSGXCjodsfTuMHhXvN_fDR11biKRXk/edit?usp=sharing"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#ff5733] font-medium hover:underline transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  Privacy Policy.
+                </a>
+              </label>
+            </motion.div>
+
+            {/* Submit Button */}
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="pt-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className={`w-full flex justify-center items-center py-4 px-4 rounded-full shadow-lg text-lg font-bold text-black bg-[#ff5733] hover:bg-[#e04c2c] focus:outline-none focus:ring-4 focus:ring-[#ff5733]/30 transition-all ${loading ? 'opacity-70 cursor-not-allowed' : 'active:scale-[0.98]'}`}
+              >
+                {loading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Registering...
+                  </>
+                ) : 'Registration'}
+              </button>
+            </motion.div>
           </form>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            className="mt-6 pt-6 border-t border-gray-100 text-center"
-          >
-            <p className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <button 
+          {/* Footer Link */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="mt-8 text-center">
+            <p className="text-sm text-gray-500 font-medium">
+              Already Have An Account?{' '}
+              <button
                 onClick={() => navigate('/login')}
-                className="font-bold text-orange-500 hover:text-orange-600 transition-colors focus:outline-none"
+                className="font-bold text-[#ff5733] hover:text-[#e04c2c] transition-colors focus:outline-none"
               >
-                Sign in
+                Log In
               </button>
             </p>
           </motion.div>
         </div>
       </motion.div>
-
-      {/* Optional: Add this CSS to your global stylesheet (index.css) to hide the scrollbar but keep functionality */}
-      <style dangerouslySetInnerHTML={{__html: `
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #fbd38d; border-radius: 10px; }
-      `}} />
     </div>
   );
 };

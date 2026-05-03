@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Footer from './futer'; // Note: check file name spelling
+import Footer from './futer'; 
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
 import { motion } from "motion/react";
@@ -15,7 +15,31 @@ const MenuPage = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [user, setUser] = useState(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
   const navigate = useNavigate();
+
+  // --- New Data: Banners and Popular Food ---
+  const banners = [
+    "https://res.cloudinary.com/di4skdwzm/image/upload/v1777839903/Screenshot_1948-02-14_at_1.54.30_AM_unf4zi.png",
+    "https://res.cloudinary.com/di4skdwzm/image/upload/v1777840589/food_web_banner_29_rsh8a0.jpg",
+    "https://res.cloudinary.com/di4skdwzm/image/upload/v1777841256/4224777_zyqpv9.jpg",
+    "https://res.cloudinary.com/di4skdwzm/image/upload/v1777842205/Brown_and_Yellow_Creative_Roasted_Chicken_Promotion_Banner_lekoa7.jpg"
+  ];
+
+  const popularFoods = [
+    { name: "Biryani", image: "https://res.cloudinary.com/di4skdwzm/image/upload/v1776261908/uemfoods/bwomdmohj6djzcfl77g6.jpg" },
+    { name: "Momo", image: "https://i.pinimg.com/474x/fe/c3/b3/fec3b34d5edb094554ed761c0d6f9d17.jpg" },
+    { name: "Chicken Stick", image: "https://img.magnific.com/free-psd/four-delicious-grilled-chicken-skewers-garnished-with-fresh-parsley-stacked-against-black-background_84443-63587.jpg?semt=ais_hybrid&w=740&q=80" },
+    {name: "cornetto", image:"https://instamart-media-assets.swiggy.com/swiggy/image/upload/fl_lossy,f_auto,q_auto/NI_CATALOG/IMAGES/CIW/2024/6/7/c2a3b500-c0b0-4008-9c08-993c2d48a427_icecream_0QPY96XCZ5_MN.png"}
+  ];
+
+  // Auto-sliding banner logic
+  useEffect(() => {
+    const slideTimer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % banners.length);
+    }, 4000); // changes every 4 seconds
+    return () => clearInterval(slideTimer);
+  }, [banners.length]);
 
   // 1. Fetch Food Items
   useEffect(() => {
@@ -136,7 +160,7 @@ const MenuPage = () => {
         </div>
 
         {/* Search Bar */}
-        <div className="mb-12 max-w-lg mx-auto">
+        <div className="mb-10 max-w-lg mx-auto">
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
               <svg className="h-5 w-5 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -150,6 +174,57 @@ const MenuPage = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
+          </div>
+        </div>
+
+        {/* --- Popular Food Section --- */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Popular Food</h2>
+            
+          </div>
+          
+          <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+            {popularFoods.map((food, idx) => (
+              <div 
+                key={idx} 
+                className="flex items-center gap-3 bg-white dark:bg-gray-800 p-2 pr-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 min-w-max cursor-pointer hover:shadow-md transition-shadow"
+              >
+                <img 
+                  src={food.image} 
+                  alt={food.name} 
+                  className="w-14 h-14 rounded-lg object-cover" 
+                />
+                <span className="font-bold text-lg text-gray-800 dark:text-gray-200">{food.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* --- Sliding Banner Section --- */}
+        <div className="mb-12 relative w-full h-48 sm:h-64 md:h-80 overflow-hidden rounded-2xl shadow-lg">
+          {banners.map((url, idx) => (
+            <img
+              key={idx}
+              src={url}
+              alt={`Banner ${idx + 1}`}
+              className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-1000 ${
+                idx === currentSlide ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
+          ))}
+          {/* Banner Navigation Dots */}
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+            {banners.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentSlide(idx)}
+                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                  idx === currentSlide ? 'bg-white w-6' : 'bg-white/60 hover:bg-white/80'
+                }`}
+                aria-label={`Go to slide ${idx + 1}`}
+              />
+            ))}
           </div>
         </div>
 
@@ -179,7 +254,6 @@ const MenuPage = () => {
               
               // NEW LOGIC: Calculate discount and final price
               const hasDiscount = item.discount && item.discount > 0;
-              // Using Math.round to avoid decimals in INR
               const finalPrice = hasDiscount 
                   ? Math.round(item.price - (item.price * (item.discount / 100))) 
                   : item.price;
@@ -235,7 +309,6 @@ const MenuPage = () => {
                               id: item._id, 
                               url: item.pic_url, 
                               title: item.title, 
-                              // Passing both original and final prices in case your product page needs them
                               originalPrice: item.price, 
                               price: finalPrice, 
                               discount: item.discount,

@@ -13,7 +13,6 @@ const LoginPage = () => {
     password: ''
   });
   const [loading, setLoading] = useState(false);
-  // New state for password visibility
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
@@ -44,7 +43,7 @@ const LoginPage = () => {
       );
 
       if (response.data.status) {
-        setCookie('authToken', response.data.your_token, 7); 
+        setCookie('authToken', response.data.your_token, 120); 
         toast.success('Login successful!');
         setTimeout(() => {
           navigate('/');
@@ -60,117 +59,94 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="h-full w-screen bg-gray-50 flex items-center justify-center p-4 sm:p-8 font-sans">
+    <div className=" h-full w-screen bg-[#fdf2f2] flex flex-col items-center justify-center p-4 font-sans selection:bg-[#ff5733] selection:text-white">
       <Toaster position="top-center" />
-      
+
       <motion.div 
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="max-w-md w-full relative pt-12"
       >
-        {/* Left Side: Branding Panel (Hidden on very small screens, visible on md+) */}
-        <div className="hidden md:flex md:w-1/2 bg-gradient-to-br from-orange-500 to-amber-600 p-12 flex-col justify-between relative overflow-hidden">
-          {/* Decorative background circles */}
-          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-10"></div>
-          <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 rounded-full bg-orange-900 opacity-10"></div>
-          
-          <div className="relative z-10">
-            <motion.h2 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-4xl font-extrabold text-white mb-4"
-            >
-              foodHub
-            </motion.h2>
-            <motion.p 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="text-orange-100 text-lg"
-            >
-              Satisfy your cravings with the best meals on campus. Sign in to track your orders and discover new favorites.
-            </motion.p>
-          </div>
-          
-          <div className="relative z-10 text-orange-200 text-sm font-medium">
-            © {new Date().getFullYear()} foodHub. All rights reserved.
+        {/* Chef Illustration Header */}
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-16 z-10">
+          <div className="w-48 h-48 rounded-full overflow-hidden border-4 border-white shadow-sm bg-white flex items-center justify-center">
+            <img 
+              src="https://res.cloudinary.com/di4skdwzm/image/upload/404b6e76-cf80-45c5-97ab-3750c216fa48_tcbdol.jpg" 
+              alt="Hungry Baba Chef" 
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
 
-        {/* Right Side: Login Form */}
-        <div className="w-full md:w-1/2 p-8 sm:p-12 flex flex-col justify-center bg-white">
-          <div className="md:hidden mb-8 text-center">
-             <h1 className="text-3xl font-bold text-orange-500">Hungry Baba</h1>
-             <p className="text-gray-500 mt-2">Welcome back! Please sign in.</p>
+        {/* Main Card */}
+        <div className="bg-white rounded-[40px] shadow-2xl pt-36 pb-10 px-6 sm:px-10 w-full">
+          
+          {/* Top Toggle Buttons */}
+          <div className="flex bg-gray-50 rounded-full p-1.5 mb-8 shadow-inner">
+            <button 
+              onClick={() => navigate('/register')}
+              type="button"
+              className="flex-1 py-3 text-center rounded-full text-gray-500 font-semibold text-sm transition-all hover:text-gray-700"
+            >
+              Register
+            </button>
+            <button 
+              type="button"
+              className="flex-1 py-3 text-center rounded-full caret-amber-700 bg-amber-700 text-black font-semibold text-sm shadow-md transition-all"
+            >
+              Log In
+            </button>
           </div>
 
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="hidden md:block mb-8"
-          >
-            <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
-            <p className="text-gray-500 mt-2">Please enter your details to sign in.</p>
-          </motion.div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Phone Number Input */}
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.2 }}
             >
-              <label htmlFor="phone" className="block text-gray-700 text-sm font-semibold mb-2">
+              <label htmlFor="phone" className="block text-gray-600 text-sm font-medium mb-1.5 ml-2">
                 Phone Number
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                  </svg>
-                </div>
                 <input
                   type="tel"
                   id="phone"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  className="block w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                  placeholder="Enter your phone number"
+                  className="block w-full pl-6 pr-4 py-4 bg-gray-50 border-transparent rounded-full text-gray-900 focus:bg-white focus:ring-2 focus:ring-[#ff5733] focus:border-transparent transition-all duration-200 outline-none"
+                  placeholder="Phone number"
                 />
               </div>
             </motion.div>
 
+            {/* Password Input */}
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
+              transition={{ delay: 0.3 }}
             >
-              <label htmlFor="password" className="block text-gray-700 text-sm font-semibold mb-2">
+              <label htmlFor="password" className="block text-gray-600 text-sm font-medium mb-1.5 ml-2">
                 Password
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
                 <input
                   type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="block w-full pl-11 pr-12 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
-                  placeholder="Enter your password"
+                  className="block w-full pl-6 pr-14 py-4 bg-gray-50 border-transparent rounded-full text-gray-900 focus:bg-white focus:ring-2 focus:ring-[#ff5733] focus:border-transparent transition-all duration-200 outline-none"
+                  placeholder="Password"
                 />
-                {/* Toggle Password Visibility Button */}
+                
+                {/* Toggle Password Visibility */}
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-orange-500 transition-colors focus:outline-none"
+                  className="absolute inset-y-0 right-2 pr-4 flex items-center text-gray-400 hover:text-[#ff5733] transition-colors focus:outline-none"
                 >
                   {showPassword ? (
                     <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -186,51 +162,45 @@ const LoginPage = () => {
               </div>
             </motion.div>
 
-            {/* <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="flex items-center justify-between"
+            {/* Submit Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="pt-4"
             >
-              <div className="flex items-center">
-              </div>
-              <a href="#" className="text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors">
-                Forgot password?
-              </a>
-            </motion.div> */}
-
-            <motion.button
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              disabled={loading}
-              className={`w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-red-800 bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
-            >
-              {loading ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-red-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Signing in...
-                </>
-              ) : 'Sign In'}
-            </motion.button>
+              <button
+                type="submit"
+                disabled={loading}
+                className={`w-full flex justify-center items-center py-4 px-4 rounded-full shadow-lg text-lg font-bold text-black bg-[#ff5733] hover:bg-[#e04c2c] focus:outline-none focus:ring-4 focus:ring-[#ff5733]/30 transition-all ${loading ? 'opacity-70 cursor-not-allowed' : 'active:scale-[0.98]'}`}
+              >
+                {loading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Signing in...
+                  </>
+                ) : 'Log In'}
+              </button>
+            </motion.div>
           </form>
 
+          {/* Footer Link */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="mt-8 pt-6 border-t border-gray-100"
+            transition={{ delay: 0.5 }}
+            className="mt-8 text-center"
           >
-            <p className="text-center text-sm text-gray-600">
-              I have't account? {' '}
+            <p className="text-sm text-gray-500 font-medium">
+              Don't Have An Account?{' '}
               <button
                 onClick={() => navigate('/register')}
-                className="font-bold text-red-700 hover:text-orange-600 transition-colors focus:outline-none"
+                className="font-bold text-[#ff5733] hover:text-[#e04c2c] transition-colors focus:outline-none"
               >
-                Create an account
+                Sign Up
               </button>
             </p>
           </motion.div>
