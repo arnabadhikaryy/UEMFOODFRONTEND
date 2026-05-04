@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
 import backend_Url from '../backend_url_return_function/backendUrl';
+import { setCookie } from '../middelwaie/cookie'; 
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ const RegisterPage = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
@@ -53,11 +54,11 @@ const RegisterPage = () => {
       return;
     }
 
-    if (!avatar) {
-      toast.error('Please upload a profile image');
-      setLoading(false);
-      return;
-    }
+    // if (!avatar) {
+    //   toast.error('Please upload a profile image');
+    //   setLoading(false);
+    //   return;
+    // }
 
     if (!agreedToPolicy) {
       toast.error('You must read and agree to the Privacy Policy to register.');
@@ -75,6 +76,7 @@ const RegisterPage = () => {
       formDataToSend.append('user_address', combinedAddress);
       formDataToSend.append('avatar', avatar);
 
+      // 1. Register the user
       const response = await axios.post(
         `${backend_Url}/user/siginup`,
         formDataToSend,
@@ -86,10 +88,34 @@ const RegisterPage = () => {
       );
 
       if (response.data.status) {
-        toast.success('Registration successful! Please login');
-        setTimeout(() => {
+        toast.success('Registration successful! Logging you in...');
+        
+        // 2. Automatically Log the user in right after
+        try {
+          const loginResponse = await axios.post(
+            `${backend_Url}/user/login`,
+            {
+              phone: Number(formData.phone), // Match the format used in your LoginPage
+              password: formData.password
+            }
+          );
+
+          if (loginResponse.data.status) {
+            // Set the cookie and redirect to Home
+            setCookie('authToken', loginResponse.data.your_token, 120); 
+            setTimeout(() => {
+              navigate('/'); // Redirect to the dashboard/home page
+            }, 1000);
+          } else {
+            // Fallback just in case auto-login fails
+            toast.error('Auto-login failed, redirecting to login page...');
+            navigate('/login');
+          }
+        } catch (loginError) {
+          toast.error('Auto-login failed, redirecting to login page...');
           navigate('/login');
-        }, 1500);
+        }
+
       } else {
         toast.error(response.data.message || 'Registration failed');
       }
