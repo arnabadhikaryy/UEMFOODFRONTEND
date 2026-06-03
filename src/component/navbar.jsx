@@ -63,7 +63,7 @@ const Navbar = () => {
             <NavLink to="/" text="Home" />
             {user && <NavLink to="/profile" text="Account" />}
             {user && <NavLink to="/orderhistory" text="Your Orders" />}
-            {user && <NavLink to="/profile/edit" text="Edit Profile" />}
+            {user && <NavLink to="/profile/edit" text="Change Delivery Address" />}
 
             {/* Admin Links */}
             {user?.phone === adminphone && (
@@ -141,10 +141,10 @@ const Navbar = () => {
               {user && (
                 <>
                   <MobileNavLink to="/profile" text="Your Profile" onClick={() => setDropdownOpen(false)} />
-                  <MobileNavLink to="/profile/edit" text="Edit Profile" onClick={() => setDropdownOpen(false)} />
+                  <MobileNavLink to="/profile/edit" text="Change Delivery Address" onClick={() => setDropdownOpen(false)} />
                   <MobileNavLink to="/orderhistory" text="Your Orders" onClick={() => setDropdownOpen(false)} />
 
-                  {/* Added missing Admin Links to mobile */}
+                  {/* Added missing Admin Links to mobile */} 
                   {user?.phone == adminphone && (
                     <div className="border-t border-gray-100 dark:border-gray-800 my-2 pt-2">
                       <p className="px-3 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Admin</p>

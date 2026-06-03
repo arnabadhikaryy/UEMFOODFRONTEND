@@ -68,6 +68,7 @@ const UsersWithOrdersPage = () => {
           `${backend_Url}/production/getUsersWithOrders`,
           { headers: { 'Authorization': `Bearer ${token}` } }
         );
+        console.log(response);
 
         if (response.data.status) {
           setUsers(response.data.message || []);
@@ -329,7 +330,7 @@ const OrderCard = ({ order, userId, onRemove }) => (
               Confirmed
           </span>
           <button 
-            onClick={() => onRemove(userId, order._id)}
+            onClick={() => console.log(order)}
             className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition-colors"
             title="Delete Order"
           >

@@ -5,7 +5,8 @@ import { motion } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
 import { getCookie } from '../middelwaie/cookie';
 import Navbar from './navbar';
-import backend_Url from '../backend_url_return_function/backendUrl';
+// Note: Double check if backend_Url should be a named import like { backend_Url } depending on your file export!
+import { backend_Url } from '../backend_url_return_function/backendUrl';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -44,7 +45,6 @@ const ProfilePage = () => {
         setError(err.response?.data?.message || err.message);
         toast.error(err.response?.data?.message || 'An error occurred');
         if (err.response?.status === 401) {
-          // Token expired or invalid
           navigate('/login');
         }
       } finally {
@@ -56,7 +56,6 @@ const ProfilePage = () => {
   }, [navigate]);
 
   const handleLogout = () => {
-    // Clear the auth token cookie
     document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
     toast.success('Logged out successfully');
     navigate('/login');
@@ -97,10 +96,7 @@ const ProfilePage = () => {
           
           <div className="px-6 pb-6">
             <div className="flex flex-col items-center -mt-16">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                className="relative"
-              >
+              <motion.div whileHover={{ scale: 1.05 }} className="relative">
                 <img
                   className="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800 object-cover shadow-md transition-colors duration-300"
                   src={userData?.imageURL || 'https://www.gravatar.com/avatar/default?s=200'}
@@ -160,7 +156,7 @@ const ProfilePage = () => {
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Member Since</p>
                     <p className="text-gray-900 dark:text-gray-200">
-                      {new Date(userData?._id?.toString()?.substring(0, 8) * 1000).toLocaleDateString()}
+                      {userData?._id ? new Date(parseInt(userData._id.substring(0, 8), 16) * 1000).toLocaleDateString() : 'N/A'}
                     </p>
                   </div>
                   <div>
@@ -190,12 +186,20 @@ const ProfilePage = () => {
               
               {userData?.orders?.length > 0 ? (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {userData.orders.slice(0, 2).map(order => (
-                    <div key={order} className="border dark:border-gray-700 rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                      <p className="text-sm text-gray-500 dark:text-gray-400">Order ID</p>
-                      <p className="text-gray-900 dark:text-gray-200 font-mono text-sm">{order}</p>
-                    </div>
-                  ))}
+                  {userData.orders.slice(0, 2).map((order, index) => {
+                    // Extract unique string values assuming order is an object or a plain string ID
+                    const orderId = order?._id || order?.id || order;
+                    const orderKey = typeof orderId === 'string' ? orderId : index;
+
+                    return (
+                      <div key={orderKey} className="border dark:border-gray-700 rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Order ID</p>
+                        <p className="text-gray-900 dark:text-gray-200 font-mono text-sm truncate">
+                          {typeof orderId === 'string' ? orderId : `Order #${index + 1}`}
+                        </p>
+                      </div>
+                    );
+                  })}
                 </div> 
               ) : (
                 <div className="text-center py-8">
