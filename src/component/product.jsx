@@ -11,40 +11,6 @@ import backend_Url from '../backend_url_return_function/backendUrl';
 import { load } from '@cashfreepayments/cashfree-js';
 import { payment_mode } from '../backend_url_return_function/backendUrl';
 
-// Fixed restaurant location from provided coordinates
-const RESTAURANT_LOCATION = {
-  lat: 22.972723503150917,  // Latitude from Google Maps
-  lng: 88.782188184599      // Longitude from Google Maps
-};
-
-// Function to calculate distance between two coordinates in meters using Haversine formula
-function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371e3; // Earth's radius in meters
-  const φ1 = lat1 * Math.PI / 180;
-  const φ2 = lat2 * Math.PI / 180;
-  const Δφ = (lat2 - lat1) * Math.PI / 180;
-  const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-  const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-    Math.cos(φ1) * Math.cos(φ2) *
-    Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-  const distance = R * c; // Distance in meters
-  return distance;
-}
-
-// Function to calculate delivery charge based on distance (currently free)
-function calculateDeliveryCharge(distanceInMeters) {
-  // ₹2 per 10 meters - but keeping it free for now
-  // const chargePer10Meters = 2;
-  // const charge = (distanceInMeters / 10) * chargePer10Meters;
-  // return Math.round(charge * 100) / 100;
-  
-  // Free delivery for now
-  return 0;
-}
-
 function Product() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -56,14 +22,6 @@ function Product() {
   const [loadingCod, setLoadingCod] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [userToken, setUserToken] = useState('');
-  
-  // New states for location and delivery
-  const [userLocation, setUserLocation] = useState(null);
-  const [distance, setDistance] = useState(null);
-  const [deliveryCharge, setDeliveryCharge] = useState(0);
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const [locationError, setLocationError] = useState(null);
-  const [calculatedCharge, setCalculatedCharge] = useState(0); // Store what charge WOULD be
 
   // --- New Review States ---
   const [reviews, setReviews] = useState([]);
@@ -72,91 +30,6 @@ function Product() {
 
   // State for confirmation modal
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-
-  // Function to get user's current location
-  const getUserLocation = () => {
-    return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        reject(new Error('Geolocation is not supported by your browser'));
-      } else {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            resolve({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude
-            });
-          },
-          (error) => {
-            let errorMessage = 'Unable to get your location. ';
-            switch(error.code) {
-              case error.PERMISSION_DENIED:
-                errorMessage += 'Please allow location access to calculate delivery charges.';
-                break;
-              case error.POSITION_UNAVAILABLE:
-                errorMessage += 'Location information is unavailable.';
-                break;
-              case error.TIMEOUT:
-                errorMessage += 'Location request timed out.';
-                break;
-              default:
-                errorMessage += 'Please check your location settings.';
-            }
-            reject(new Error(errorMessage));
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
-          }
-        );
-      }
-    });
-  };
-
-  // Function to calculate what the charge would be (for display only)
-  const calculateWhatChargeWouldBe = (distanceInMeters) => {
-    const chargePer10Meters = 2;
-    const charge = (distanceInMeters / 10) * chargePer10Meters;
-    return Math.round(charge * 100) / 100;
-  };
-
-  // Function to fetch location and calculate distance/charges
-  const fetchLocationAndCalculate = async () => {
-    setIsGettingLocation(true);
-    setLocationError(null);
-    
-    try {
-      const userLoc = await getUserLocation();
-      setUserLocation(userLoc);
-      
-      // Calculate distance
-      const distanceInMeters = calculateDistance(
-        userLoc.lat, userLoc.lng,
-        RESTAURANT_LOCATION.lat, RESTAURANT_LOCATION.lng
-      );
-      setDistance(distanceInMeters);
-      
-      // Calculate what the charge would be (for display)
-      const wouldBeCharge = calculateWhatChargeWouldBe(distanceInMeters);
-      setCalculatedCharge(wouldBeCharge);
-      
-      // Set actual delivery charge (free)
-      const actualCharge = calculateDeliveryCharge(distanceInMeters);
-      setDeliveryCharge(actualCharge);
-      
-      // Optional: Show toast with distance info
-      toast.success(`Distance: ${(distanceInMeters / 1000).toFixed(2)}km | Delivery is FREE! (Would be ₹${wouldBeCharge})`, {
-        duration: 5000
-      });
-      
-    } catch (error) {
-      console.error('Location error:', error);
-      setLocationError(error.message);
-      toast.error(error.message || 'Unable to get location for delivery calculation');
-    } finally {
-      setIsGettingLocation(false);
-    }
-  };
 
   useEffect(() => {
     // If no state exists (user navigated directly to URL), redirect back
@@ -184,9 +57,6 @@ function Product() {
     } else {
       navigate('/register');
     }
-
-    // Auto-fetch location when component loads
-    fetchLocationAndCalculate();
 
     // --- Fetch Reviews Logic ---
     const fetchReviews = async () => {
@@ -219,11 +89,6 @@ function Product() {
 
   }, [navigate, location.state, id]);
 
-  // Calculate total amount (only product price, delivery is free)
-  const getTotalAmount = () => {
-    const subtotal = price * quantity;
-    return subtotal; // No delivery charge added
-  };
 
   const handlePlaceOrder = async () => {
     if (!userPhone) {
@@ -232,28 +97,16 @@ function Product() {
       return;
     }
 
-    // Check if location is available
-    if (!userLocation) {
-      toast.error('Unable to get your location. Please ensure location access is enabled.');
-      return;
-    }
-
     setLoading(true);
     try {
       const cashfree = await load({ mode: payment_mode });
-      const totalAmount = getTotalAmount();
 
       const orderResponse = await axios.post(`${backend_Url}/api/v1/orders/payment`, {
-        amount: totalAmount,
+        amount: price * quantity,
         name: title,
         phone: userPhone,
         orderID: id,
-        token: userToken,
-        quantity: quantity,
-        deliveryCharge: deliveryCharge, // This will be 0
-        calculatedCharge: calculatedCharge, // Send what it would have been
-        distance: distance,
-        userLocation: userLocation
+        token: userToken
       });
 
       if (orderResponse.data.success) {
@@ -275,10 +128,7 @@ function Product() {
               cf_order_id: orderResponse.data.order_id,
               userPhone: userPhone,
               foodOrderID: id,
-              price: totalAmount,
-              quantity: quantity,
-              deliveryCharge: deliveryCharge,
-              distance: distance
+              price: price * quantity
             });
 
             toast.dismiss();
@@ -302,6 +152,7 @@ function Product() {
     }
   };
 
+
   const handleCashOnDelivery = async () => {
     setShowConfirmModal(false);
 
@@ -311,28 +162,15 @@ function Product() {
       return;
     }
 
-    // Check if location is available
-    if (!userLocation) {
-      toast.error('Unable to get your location. Please ensure location access is enabled.');
-      return;
-    }
-
     setLoadingCod(true);
     try {
-      const totalAmount = getTotalAmount();
-      
       const response = await axios.post(
         `${backend_Url}/production/order`,
         {
           token: userToken,
           orderID: id,
           after_discount_final_price: price,
-          quantity: quantity,
-          deliveryCharge: deliveryCharge,
-          calculatedCharge: calculatedCharge,
-          distance: distance,
-          totalAmount: totalAmount,
-          userLocation: userLocation
+          quantity: quantity
         }
       );
 
@@ -394,9 +232,7 @@ function Product() {
               <h3 className="text-2xl font-bold text-emerald-500 mb-2">Confirm Order</h3>
               <p className="text-gray-600 mb-6">
                 You are about to place an order for <strong>{quantity}x {title}</strong>. <br />
-                Subtotal: <span className="font-bold text-gray-900">₹{price * quantity}</span><br />
-                Delivery Charge: <span className="font-bold text-green-600">FREE</span><br />
-                Total amount to pay is <span className="font-bold text-gray-900">₹{getTotalAmount()}</span>.
+                Total amount to pay on delivery is <span className="font-bold text-gray-900">₹{price * quantity}</span>.
               </p>
 
               <div className="flex gap-3">
@@ -408,7 +244,7 @@ function Product() {
                 </button>
                 <button
                   onClick={handleCashOnDelivery}
-                  className="flex-1 py-3 px-4 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200"
+                  className="flex-1 py-3 px-4 rounded-xl bg-emerald-600 text-emerald-400 font-bold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200"
                 >
                   Confirm
                 </button>
@@ -449,10 +285,12 @@ function Product() {
                   <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 tracking-wide uppercase">
                     In Stock
                   </span>
-                  <span className="flex items-center text-sm font-semibold text-emerald-600">
-                    <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-                    Free Delivery
-                  </span>
+                  {price > 200 && (
+                    <span className="flex items-center text-sm font-semibold text-emerald-600">
+                      <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                      Free Delivery
+                    </span>
+                  )}
                 </div>
 
                 <h1 className="text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight mb-2 capitalize">
@@ -474,59 +312,27 @@ function Product() {
                   {description}
                 </p>
 
-                {/* Location Info Section */}
-                <div className="mb-6 p-4 bg-gray-50 rounded-xl">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      <span className="font-semibold text-gray-700">Delivery Info</span>
-                    </div>
-                    <button
-                      onClick={fetchLocationAndCalculate}
-                      disabled={isGettingLocation}
-                      className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
-                    >
-                      {isGettingLocation ? 'Updating...' : 'Update Location'}
-                    </button>
-                  </div>
-                  
-                  {isGettingLocation ? (
-                    <div className="flex items-center gap-2 text-gray-500">
-                      <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span>Getting your location...</span>
-                    </div>
-                  ) : locationError ? (
-                    <div className="text-red-600 text-sm">
-                      <p>{locationError}</p>
-                      <button
-                        onClick={fetchLocationAndCalculate}
-                        className="mt-2 text-emerald-600 underline"
-                      >
-                        Try Again
-                      </button>
-                    </div>
-                  ) : distance !== null ? (
-                    <div className="space-y-1">
-                      <p className="text-sm text-gray-600">
-                        Distance from restaurant: <span className="font-semibold">{(distance / 1000).toFixed(2)} km</span>
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Delivery charge: <span className="font-semibold text-green-600">FREE</span>
-                      </p>
-                      {calculatedCharge > 0 && (
-                        <p className="text-xs text-gray-400 mt-1">
-                          *Normally ₹2 per 10m would be <span className="line-through">₹{calculatedCharge}</span> but delivery is FREE for now!
-                        </p>
-                      )}
-                    </div>
+                <div className="mb-8 flex flex-col gap-1">
+                  {discount && discount > 0 ? (
+                    <>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xl text-gray-400 line-through font-medium">
+                          ₹{originalPrice}
+                        </span>
+                        <span className="bg-red-100 text-red-600 text-2xl font-bold px-2.5 py-0.5 rounded-md uppercase tracking-wide">
+                          {discount}% OFF
+                        </span>
+                      </div>
+                      <div className="flex items-end gap-2">
+                        <span className="text-4xl font-black text-gray-900">₹{price}</span>
+                        <span className="text-gray-400 text-lg mb-1 font-medium">/ plate</span>
+                      </div>
+                    </>
                   ) : (
-                    <p className="text-sm text-gray-500">Unable to calculate delivery charge. Please enable location access.</p>
+                    <div className="flex items-end gap-2">
+                      <span className="text-4xl font-black text-gray-900">₹{price}</span>
+                      <span className="text-gray-400 text-lg mb-1 font-medium">/ plate</span>
+                    </div>
                   )}
                 </div>
 
@@ -557,7 +363,6 @@ function Product() {
                   <div className="text-left sm:text-right">
                     <p className="text-sm font-bold text-gray-500 mb-1 uppercase tracking-wide">Total Amount</p>
                     <p className="text-3xl font-black text-emerald-600">₹{price * quantity}</p>
-                    <p className="text-xs text-gray-400 mt-1">Free Delivery</p>
                   </div>
                 </div>
               </div>
@@ -567,9 +372,9 @@ function Product() {
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handlePlaceOrder}
-                  disabled={loading || loadingCod || !userLocation}
+                  disabled={loading || loadingCod}
                   className={`w-full py-4 px-6 rounded-xl text-lg font-bold shadow-lg transition-all 
-                  ${loading || loadingCod || !userLocation
+                  ${loading || loadingCod
                       ? 'bg-blue-400 cursor-not-allowed text-black shadow-none'
                       : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-blue-200'
                     }`}
@@ -588,7 +393,7 @@ function Product() {
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
                         Pay Now
                       </span>
-                      <span className="bg-blue-700 text-white px-3 py-1 rounded-md font-bold text-lg">₹{price * quantity}</span>
+                      <span className="bg-blue-700 text-black px-3 py-1 rounded-md font-bold text-lg">₹{price * quantity}</span>
                     </div>
                   )}
                 </motion.button>
@@ -597,9 +402,9 @@ function Product() {
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setShowConfirmModal(true)}
-                  disabled={loading || loadingCod || !userLocation}
+                  disabled={loading || loadingCod}
                   className={`w-full py-4 px-6 rounded-xl text-lg font-bold shadow-lg transition-all 
-                    ${loading || loadingCod || !userLocation
+                    ${loading || loadingCod
                       ? 'bg-emerald-400 cursor-not-allowed text-white shadow-none'
                       : 'bg-emerald-600 text-white hover:bg-emerald-700 hover:shadow-emerald-200'
                     }`}
@@ -613,17 +418,12 @@ function Product() {
                       <span>Processing Order...</span>
                     </div>
                   ) : (
-                    <div className="flex justify-center items-center text-white w-full px-2">
-                      <span>Order via Cash on Delivery</span>
+                    <div className="flex justify-center items-center text-blue-800 w-full px-2">
+                      <span>Order via Cash on Delivery [free]</span>
                     </div>
                   )}
                 </motion.button>
               </div>
-              {!userLocation && !isGettingLocation && (
-                <p className="mt-5 text-center text-sm font-medium text-red-500">
-                  Please enable location access to place orders
-                </p>
-              )}
               <p className="mt-5 text-center text-sm font-medium text-gray-400">
                 Online payments are temporarily paused. COD is available.
               </p>
