@@ -72,7 +72,7 @@ const LoginPage = () => {
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-16 z-10">
           <div className="w-48 h-48 rounded-full overflow-hidden border-4 border-white shadow-sm bg-white flex items-center justify-center">
             <img 
-              src="https://res.cloudinary.com/di4skdwzm/image/upload/404b6e76-cf80-45c5-97ab-3750c216fa48_tcbdol.jpg" 
+              src="https://res.cloudinary.com/di4skdwzm/image/upload/playstore-icon_y7w5po.png" 
               alt="Hungry Baba Chef" 
               className="w-full h-full object-cover"
             />

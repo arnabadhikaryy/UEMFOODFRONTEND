@@ -41,6 +41,11 @@ const Icons = {
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
     </svg>
+  ),
+  FoodItem: ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 21h6M12 15v6" />
+    </svg>
   )
 };
 
@@ -49,6 +54,7 @@ const UsersWithOrdersPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expandedUserId, setExpandedUserId] = useState(null);
+  const [deletingOrderId, setDeletingOrderId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -86,41 +92,47 @@ const UsersWithOrdersPage = () => {
     fetchUsersWithOrders();
   }, [navigate]);
 
-  const handleRemoveOrder = async (userId, orderId) => {
+  const handleDeleteProduct = async (foodItemId, orderId, userId) => {
     const token = getCookie('authToken');
     if (!token) {
       toast.error('Authentication token missing');
       return;
     }
 
+    setDeletingOrderId(orderId);
+
     try {
-      const response = await axios.post(`${backend_Url}/user/remove/order`, {
-        token: token,
-        userId: userId,
-        orderId: orderId
-      });
+      // Call the delete product API
+      const response = await axios.delete(
+        `${backend_Url}/production/delete/product`,
+        {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          data: { _id: foodItemId, token:token } // Send the food item _id in the request body
+        }
+      );
 
       if (response.data.success) {
-        toast.success('Order removed successfully');
+        toast.success('Product and associated orders deleted successfully');
         
+        // Remove the order from the UI
         setUsers(prevUsers => prevUsers.map(user => {
           if (user._id === userId) {
-            const updatedOrders = [...user.orders];
-            const indexToRemove = updatedOrders.findIndex(order => order._id === orderId);
-            
-            if (indexToRemove !== -1) {
-              updatedOrders.splice(indexToRemove, 1);
-            }
-            
+            const updatedOrders = user.orders.filter(order => order._id !== orderId);
             return { ...user, orders: updatedOrders };
           }
           return user;
         }));
       } else {
-        toast.error('Failed to remove order');
+        toast.error(response.data.message || 'Failed to delete product');
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Error removing order');
+      console.error('Delete error:', err);
+      toast.error(err.response?.data?.message || 'Error deleting product');
+    } finally {
+      setDeletingOrderId(null);
     }
   };
 
@@ -128,14 +140,14 @@ const UsersWithOrdersPage = () => {
     const totalUsers = users.length;
     const totalOrders = users.reduce((acc, user) => acc + (user.orders?.length || 0), 0);
     const totalRevenue = users.reduce((acc, user) => {
-        const userTotal = user.orders?.reduce((sum, order) => sum + (Number(order.price) || 0), 0) || 0;
+        const userTotal = user.orders?.reduce((sum, order) => sum + (Number(order.priceAtPurchase) || 0), 0) || 0;
         return acc + userTotal;
     }, 0);
     return { totalUsers, totalOrders, totalRevenue };
   }, [users]);
 
   const getUserTotal = (orders) => {
-    return orders.reduce((sum, order) => sum + (Number(order.price) || 0), 0);
+    return orders.reduce((sum, order) => sum + (Number(order.priceAtPurchase) || 0), 0);
   };
 
   const toggleExpand = (id) => {
@@ -193,7 +205,8 @@ const UsersWithOrdersPage = () => {
                     isExpanded={expandedUserId === (user._id || index)}
                     onToggle={() => toggleExpand(user._id || index)}
                     userTotal={getUserTotal(user.orders)}
-                    onRemoveOrder={handleRemoveOrder}
+                    onDeleteProduct={handleDeleteProduct}
+                    deletingOrderId={deletingOrderId}
                   />
                 ))}
               </div>
@@ -218,7 +231,7 @@ const StatCard = ({ label, value, color, icon }) => (
   </div>
 );
 
-const UserRow = ({ user, isExpanded, onToggle, userTotal, onRemoveOrder }) => {
+const UserRow = ({ user, isExpanded, onToggle, userTotal, onDeleteProduct, deletingOrderId }) => {
   
   // Sorting the orders by _id to group identical items together
   const groupedOrders = [...user.orders].sort((a, b) => {
@@ -226,6 +239,11 @@ const UserRow = ({ user, isExpanded, onToggle, userTotal, onRemoveOrder }) => {
     const idB = b._id || '';
     return idA.localeCompare(idB);
   });
+
+  // Debug: Log the first order to see its structure
+  if (groupedOrders.length > 0 && process.env.NODE_ENV === 'development') {
+    console.log('Order structure:', groupedOrders[0]);
+  }
 
   return (
     <div className="group transition-colors hover:bg-slate-50">
@@ -290,7 +308,8 @@ const UserRow = ({ user, isExpanded, onToggle, userTotal, onRemoveOrder }) => {
                     key={order._id ? `${order._id}-${idx}` : idx} 
                     order={order} 
                     userId={user._id}
-                    onRemove={onRemoveOrder}
+                    onDeleteProduct={onDeleteProduct}
+                    isDeleting={deletingOrderId === order._id}
                   />
                 ))}
               </div>
@@ -302,46 +321,104 @@ const UserRow = ({ user, isExpanded, onToggle, userTotal, onRemoveOrder }) => {
   );
 };
 
-const OrderCard = ({ order, userId, onRemove }) => (
-  <motion.div 
-    whileHover={{ y: -4 }}
-    className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 flex flex-col group"
-  >
-    <div className="relative h-48 overflow-hidden bg-gray-100">
-      <img
-        src={order.pic_url || "https://placehold.co/400x300?text=No+Image"}
-        alt={order.title}
-        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-      />
-      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-white text-xs px-2 py-1 rounded flex gap-2">
-         #{order._id?.slice(-4)}
+const OrderCard = ({ order, userId, onDeleteProduct, isDeleting }) => {
+  // Extract foodItem ID (the actual product ID to delete)
+  const foodItemId = order.foodItem;
+  const orderId = order._id;
+  const price = order.priceAtPurchase || order.price || 0;
+  const productTitle = order.foodName || 'Unknown Product';
+  const productImage = order.foodImage || `https://placehold.co/400x300?text=${encodeURIComponent(productTitle)}`;
+  
+  // Get status badge color
+  const getStatusColor = (status) => {
+    switch(status?.toLowerCase()) {
+      case 'delivered':
+        return 'bg-green-100 text-green-700';
+      case 'processing':
+        return 'bg-blue-100 text-blue-700';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const getPaymentStatusColor = (status) => {
+    switch(status?.toLowerCase()) {
+      case 'paid':
+        return 'bg-emerald-100 text-emerald-700';
+      case 'pending':
+        return 'bg-orange-100 text-orange-700';
+      default:
+        return 'bg-gray-100 text-gray-700';
+    }
+  };
+
+  const handleDelete = async (e) => {
+    e.stopPropagation(); // Prevent triggering parent onClick
+    if (window.confirm(`Are you sure you want to delete "${productTitle}"? This will remove it from all orders.`)) {
+      await onDeleteProduct(foodItemId, orderId, userId);
+    }
+  };
+
+  return (
+    <motion.div 
+      whileHover={{ y: -4 }}
+      className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 flex flex-col group relative"
+    >
+      <div className="relative h-48 overflow-hidden bg-gray-100">
+        <img
+          src={productImage}
+          alt={productTitle}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          onError={(e) => {
+            e.target.src = `https://placehold.co/400x300?text=${encodeURIComponent(productTitle)}`;
+          }}
+        />
+        <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-white text-xs px-2 py-1 rounded">
+           Qty: {order.quantity || 1}
+        </div>
       </div>
-    </div>
-    <div className="p-4 flex-grow flex flex-col justify-between">
-      <div>
-        <h5 className="font-semibold text-slate-900 mb-1 line-clamp-1">{order.title}</h5>
-        <p className="text-xs text-slate-500 mb-3 font-mono break-all">ID: {order._id}</p>
-      </div>
-      <div className="flex items-center justify-between pt-3 border-t border-slate-50">
-        <span className="text-lg font-bold text-slate-800">₹{order.price}</span>
+      
+      <div className="p-4 flex-grow flex flex-col justify-between">
+        <div>
+          <h5 className="font-semibold text-slate-900 mb-1 line-clamp-1">{productTitle}</h5>
+          <div className="flex flex-wrap gap-1 mb-2">
+            <span className={`text-xs px-1.5 py-0.5 rounded ${getStatusColor(order.status)}`}>
+              {order.status || 'Unknown'}
+            </span>
+            <span className={`text-xs px-1.5 py-0.5 rounded ${getPaymentStatusColor(order.paymentstatus)}`}>
+              {order.paymentstatus || 'Unknown'}
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 font-mono break-all">ID: {orderId?.slice(-8)}</p>
+        </div>
         
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-md">
-              Confirmed
-          </span>
+        <div className="flex items-center justify-between pt-3 border-t border-slate-50 mt-2">
+          <div className="flex flex-col">
+            <span className="text-lg font-bold text-slate-800">₹{price}</span>
+            <span className="text-xs text-slate-400">per item</span>
+          </div>
+          
           <button 
-            onClick={() => console.log(order)}
-            className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition-colors"
-            title="Delete Order"
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className={`p-2 text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 ${
+              isDeleting ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110'
+            }`}
+            title="Delete Product (removes from all orders)"
           >
-            <Icons.Trash className="w-4 h-4" />
+            {isDeleting ? (
+              <div className="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Icons.Trash className="w-4 h-4" />
+            )}
           </button>
         </div>
-
       </div>
-    </div>
-  </motion.div>
-);
+    </motion.div>
+  );
+};
 
 const EmptyState = () => (
   <div className="text-center py-20">
