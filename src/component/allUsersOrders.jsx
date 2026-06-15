@@ -103,18 +103,16 @@ const UsersWithOrdersPage = () => {
 
     try {
       // Call the delete product API
-      const response = await axios.delete(
-        `${backend_Url}/production/delete/product`,
+      const response = await axios.post(
+        `${backend_Url}/user/remove/order`,
         {
-          headers: { 
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          data: { _id: foodItemId, token:token } // Send the food item _id in the request body
+           _id: foodItemId, token:token, orderId:orderId,userId:userId // Send the food item _id in the request body
         }
       );
 
       if (response.data.success) {
+        console.log('userid: '+ userId + 'oder id: '+ orderId);
+        console.log('response is: ', response);
         toast.success('Product and associated orders deleted successfully');
         
         // Remove the order from the UI
@@ -328,6 +326,7 @@ const OrderCard = ({ order, userId, onDeleteProduct, isDeleting }) => {
   const price = order.priceAtPurchase || order.price || 0;
   const productTitle = order.foodName || 'Unknown Product';
   const productImage = order.foodImage || `https://placehold.co/400x300?text=${encodeURIComponent(productTitle)}`;
+  console.log('oder details is: ', order)
   
   // Get status badge color
   const getStatusColor = (status) => {
