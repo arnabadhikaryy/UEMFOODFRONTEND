@@ -22,6 +22,9 @@ const MenuPage = () => {
   const [shops, setShops] = useState([]);
   const [selectedShop, setSelectedShop] = useState('All');
   const [isFiltering, setIsFiltering] = useState(false);
+  
+  // --- New State for Network/Server Error ---
+  const [isNetworkError, setIsNetworkError] = useState(false);
 
   // --- Data: Banners and Popular Food ---
   const banners = [
@@ -46,42 +49,60 @@ const MenuPage = () => {
     return () => clearInterval(slideTimer);
   }, [banners.length]);
 
+  // Function to fetch food items (can be called for refresh)
+  const fetchFoodItems = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      setIsNetworkError(false);
+      
+      const response = await axios.get(`${backend_Url}/production/getallfood`);
+      
+      if (response.data.status) {
+        const items = response.data.message;
+        setFoodItems(items);
+
+        // Extract unique shops from the food items
+        const uniqueShopsMap = new Map();
+        items.forEach(item => {
+          const sName = item.shop_name || 'Hungry Baba';
+          const sImage = item.shop_image || 'https://img.magnific.com/premium-vector/shops-stores-icons-set-flat-design-style-vector-illustration_498048-1862.jpg?semt=ais_hybrid&w=740&q=80';
+          
+          if (!uniqueShopsMap.has(sName)) {
+            uniqueShopsMap.set(sName, sImage);
+          }
+        });
+
+        const shopsArray = Array.from(uniqueShopsMap, ([name, image]) => ({ name, image }));
+        setShops(shopsArray);
+        
+        toast.success('Menu refreshed successfully!');
+      } else {
+        throw new Error('Failed to fetch menu items');
+      }
+    } catch (err) {
+      console.error('Error fetching food items:', err);
+      
+      // Check if it's a network error or server error
+      if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
+        setIsNetworkError(true);
+        setError('Unable to connect to the server. Please check your internet connection.');
+        toast.error('Network error! Please check your connection.');
+      } else if (err.response?.status === 500) {
+        setIsNetworkError(true);
+        setError('Server error occurred. Please try again later.');
+        toast.error('Server error! Please try again.');
+      } else {
+        setError(err.message || 'An error occurred while fetching menu items');
+        toast.error('Failed to fetch menu items');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // 1. Fetch Food Items & Extract Unique Shops
   useEffect(() => {
-    const fetchFoodItems = async () => {
-      try {
-        const response = await axios.get(`${backend_Url}/production/getallfood`);
-        if (response.data.status) {
-          const items = response.data.message;
-          setFoodItems(items);
-
-          // Extract unique shops from the food items
-          const uniqueShopsMap = new Map();
-          items.forEach(item => {
-            // Using your schema defaults as fallbacks just in case old data lacks these fields
-            const sName = item.shop_name || 'Hungry Baba';
-            const sImage = item.shop_image || 'https://img.magnific.com/premium-vector/shops-stores-icons-set-flat-design-style-vector-illustration_498048-1862.jpg?semt=ais_hybrid&w=740&q=80';
-            
-            if (!uniqueShopsMap.has(sName)) {
-              uniqueShopsMap.set(sName, sImage);
-            }
-          });
-
-          // Convert Map to Array for rendering
-          const shopsArray = Array.from(uniqueShopsMap, ([name, image]) => ({ name, image }));
-          setShops(shopsArray);
-
-        } else {
-          throw new Error('Failed to fetch menu items');
-        }
-      } catch (err) {
-        toast.error('Failed to fetch menu items');
-        setError(err.message || 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchFoodItems();
   }, []);
 
@@ -108,12 +129,11 @@ const MenuPage = () => {
 
   // --- Handle Shop Click with Fake Loading ---
   const handleShopSelect = (shopName) => {
-    if (selectedShop === shopName) return; // Do nothing if already selected
+    if (selectedShop === shopName) return;
     
     setSelectedShop(shopName);
     setIsFiltering(true);
     
-    // 2-second fake loading animation
     setTimeout(() => {
       setIsFiltering(false);
     }, 500);
@@ -148,6 +168,13 @@ const MenuPage = () => {
     }
   };
 
+  // --- Refresh Function ---
+  const handleRefresh = () => {
+    fetchFoodItems();
+    setSearchTerm('');
+    setSelectedShop('All');
+  };
+
   const MenuItemSkeleton = () => (
     <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-gray-700">
       <div className="h-32 sm:h-48 bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
@@ -176,7 +203,7 @@ const MenuPage = () => {
   });
 
   return (
-    <div className="min-h-screen w-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <div className=" h-full w-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       <Navbar />
       <Toaster position="top-right" />
 
@@ -258,7 +285,7 @@ const MenuPage = () => {
         </div>
 
         {/* --- Shops Filter Section --- */}
-        {!loading && shops.length > 0 && (
+        {!loading && shops.length > 0 && !isNetworkError && (
           <div className="mb-12">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Explore by Shop</h2>
@@ -297,17 +324,53 @@ const MenuPage = () => {
           </div>
         )}
 
-        {/* Menu Grid / Loading / Error */}
-        {loading || isFiltering ? (
+        {/* Error with Refresh Button */}
+        {(error || isNetworkError) && !loading && (
+          <div className="text-center py-16 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-200 dark:border-red-800/30">
+            <svg 
+              className="mx-auto h-16 w-16 text-red-500 dark:text-red-400 mb-4" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth="2" 
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" 
+              />
+            </svg>
+            <h3 className="text-xl font-semibold text-red-800 dark:text-red-400 mb-2">Connection Error</h3>
+            <p className="text-red-600 dark:text-red-300 mb-6 max-w-md mx-auto">
+              {error || 'Unable to connect to the server. Please check your internet connection and try again.'}
+            </p>
+            <button
+              onClick={handleRefresh}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-black font-semibold rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Refresh Page
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="inline-flex items-center gap-2 px-6 py-3 ml-3 bg-gray-600 hover:bg-gray-700 text-black font-semibold rounded-xl transition-all duration-200"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Hard Reload
+            </button>
+          </div>
+        )}
+
+        {/* Menu Grid / Loading / No Results */}
+        {(loading || isFiltering) && !error && !isNetworkError ? (
           <div className="grid grid-cols-2 gap-4 sm:gap-8 lg:grid-cols-3 xl:grid-cols-4">
             {[...Array(8)].map((_, i) => <MenuItemSkeleton key={i} />)}
           </div>
-        ) : error ? (
-          <div className="text-center py-12 bg-red-50 dark:bg-red-900/20 rounded-2xl border border-red-200 dark:border-red-800/30">
-            <h3 className="text-lg font-medium text-red-800 dark:text-red-400">Oops!</h3>
-            <p className="mt-2 text-red-600 dark:text-red-300">{error}</p>
-          </div>
-        ) : filteredItems.length === 0 ? (
+        ) : !error && !isNetworkError && filteredItems.length === 0 && !loading ? (
           <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">No items found</h3>
             <p className="mt-2 text-gray-500 dark:text-gray-400">
@@ -324,7 +387,7 @@ const MenuPage = () => {
               </button>
             )}
           </div>
-        ) : (
+        ) : !error && !isNetworkError && filteredItems.length > 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -447,7 +510,7 @@ const MenuPage = () => {
               </motion.div>
             )})}
           </motion.div>
-        )}
+        ) : null}
       </div>
 
       <Footer />
