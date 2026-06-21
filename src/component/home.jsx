@@ -210,12 +210,12 @@ const MenuPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
         {/* Header Section */}
-        <div className="text-center mb-12">
+        {/* <div className="text-center mb-12">
           <p className=' text-green-700 font-bold text-5xl '>Shop opening time 5PM to 10PM</p>
           <p className="mt-4 max-w-xl mx-auto text-lg text-gray-600 dark:text-gray-400">
             Freshly prepared dishes made with passion.
           </p>
-        </div>
+        </div> */}
 
         {/* Search Bar */}
         <div className="mb-10 max-w-lg mx-auto">
@@ -236,7 +236,7 @@ const MenuPage = () => {
         </div>
 
         {/* --- Popular Food Section --- */}
-        <div className="mb-8">
+        {/* <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Popular Food</h2>
           </div>
@@ -256,10 +256,10 @@ const MenuPage = () => {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* --- Sliding Banner Section --- */}
-        <div className="mb-8 relative w-full h-48 sm:h-64 md:h-80 overflow-hidden rounded-2xl shadow-lg">
+        {/* <div className="mb-8 relative w-full h-48 sm:h-64 md:h-80 overflow-hidden rounded-2xl shadow-lg">
           {banners.map((url, idx) => (
             <img
               key={idx}
@@ -282,7 +282,7 @@ const MenuPage = () => {
               />
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* --- Shops Filter Section --- */}
         {!loading && shops.length > 0 && !isNetworkError && (
