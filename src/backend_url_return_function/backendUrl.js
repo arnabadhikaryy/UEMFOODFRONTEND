@@ -1,7 +1,7 @@
 //const backend_Url = 'http://localhost:3000';
 //const backend_Url = 'https://uemfood-backend.onrender.com'; // slow but free
 const backend_Url = 'https://uemfoodbackend-production.up.railway.app'; // fast but costly
-const adminphone = '7365075168';
+const adminphone = '7584924835';
 const payment_mode = 'sandbox';
 //onst payment_mode = 'production';
 
